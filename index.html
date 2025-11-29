@@ -1,0 +1,2976 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Studenthood - Connect and Share on Campus</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 60px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: #2d5446;
+            letter-spacing: 1px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 40px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #2d5446;
+            font-size: 16px;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #4a7c65;
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 120px 40px 80px;
+            background-image: url('1.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Optional: Add overlay for better text readability */
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.1);
+            z-index: 1;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 10;
+            max-width: 900px;
+        }
+
+        .hero h1 {
+            font-size: 68px;
+            font-weight: 700;
+            color: #2d5446;
+            margin-bottom: 30px;
+            line-height: 1.2;
+            animation: fadeInUp 1s ease;
+        }
+
+        .hero p {
+            font-size: 22px;
+            color: #3d4f45;
+            margin-bottom: 50px;
+            line-height: 1.6;
+            animation: fadeInUp 1s ease 0.2s both;
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 18px 50px;
+            background: #4a6556;
+            color: white;
+            text-decoration: none;
+            font-size: 20px;
+            font-weight: 600;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            animation: fadeInUp 1s ease 0.4s both;
+            box-shadow: 0 4px 15px rgba(74, 101, 86, 0.3);
+        }
+
+        .cta-button:hover {
+            background: #3d5446;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(74, 101, 86, 0.4);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Features Section */
+        .features {
+            padding: 100px 60px;
+            background: linear-gradient(to bottom, #f5e6d3 0%, #e8dcc8 100%);
+        }
+
+        .features h2 {
+            text-align: center;
+            font-size: 56px;
+            color: #2d5446;
+            margin-bottom: 80px;
+            font-weight: 700;
+        }
+
+        /* About Section */
+        .about {
+            padding: 100px 60px;
+            background: linear-gradient(to bottom, #e8dcc8 0%, #d4c9b8 100%);
+        }
+
+        .about-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .about h2 {
+            text-align: center;
+            font-size: 56px;
+            color: #2d5446;
+            margin-bottom: 30px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .about-intro {
+            text-align: center;
+            font-size: 20px;
+            color: #3d4f45;
+            line-height: 1.8;
+            margin-bottom: 80px;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .about-section {
+            background: rgba(255, 255, 255, 0.7);
+            padding: 50px;
+            border-radius: 20px;
+            margin-bottom: 40px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            transition: transform 0.3s ease;
+        }
+
+        .about-section:hover {
+            transform: translateY(-5px);
+        }
+
+        .about-section h3 {
+            font-size: 32px;
+            color: #2d5446;
+            margin-bottom: 25px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .about-section p {
+            font-size: 18px;
+            color: #4d5d54;
+            line-height: 1.8;
+            margin-bottom: 20px;
+        }
+
+        .about-section ul {
+            list-style: none;
+            padding-left: 0;
+            margin-top: 20px;
+        }
+
+        .about-section ul li {
+            font-size: 18px;
+            color: #4d5d54;
+            line-height: 1.8;
+            margin-bottom: 15px;
+            padding-left: 30px;
+            position: relative;
+        }
+
+        .about-section ul li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #4a6556;
+            font-weight: bold;
+            font-size: 20px;
+        }
+
+        .vision-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .vision-item {
+            background: rgba(255, 255, 255, 0.5);
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .vision-item:hover {
+            background: rgba(255, 255, 255, 0.8);
+            transform: scale(1.05);
+        }
+
+        .vision-item h4 {
+            font-size: 22px;
+            color: #2d5446;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .vision-item p {
+            font-size: 16px;
+            color: #4d5d54;
+            line-height: 1.6;
+        }
+
+        .closing-message {
+            text-align: center;
+            font-size: 28px;
+            color: #2d5446;
+            font-weight: 600;
+            margin-top: 60px;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 20px;
+        }
+
+        /* Contact Section */
+        .contact {
+            padding: 100px 60px;
+            background: linear-gradient(to bottom, #d4c9b8 0%, #c9bfaf 100%);
+        }
+
+        .contact-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .contact h2 {
+            text-align: center;
+            font-size: 56px;
+            color: #2d5446;
+            margin-bottom: 30px;
+            font-weight: 700;
+        }
+
+        .contact-intro {
+            text-align: center;
+            font-size: 20px;
+            color: #3d4f45;
+            line-height: 1.8;
+            margin-bottom: 60px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .contact-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+            margin-top: 50px;
+        }
+
+        .contact-info {
+            background: rgba(255, 255, 255, 0.7);
+            padding: 50px;
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        .contact-info h3 {
+            font-size: 32px;
+            color: #2d5446;
+            margin-bottom: 30px;
+            font-weight: 700;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .contact-item:hover {
+            background: rgba(255, 255, 255, 0.8);
+            transform: translateX(10px);
+        }
+
+        .contact-icon {
+            font-size: 32px;
+            min-width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #4a6556;
+            color: white;
+            border-radius: 50%;
+        }
+
+        .contact-details h4 {
+            font-size: 20px;
+            color: #2d5446;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .contact-details p {
+            font-size: 16px;
+            color: #4d5d54;
+            line-height: 1.6;
+        }
+
+        .contact-details a {
+            color: #4a6556;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .contact-details a:hover {
+            color: #2d5446;
+            text-decoration: underline;
+        }
+
+        .contact-form {
+            background: rgba(255, 255, 255, 0.7);
+            padding: 50px;
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        .contact-form h3 {
+            font-size: 32px;
+            color: #2d5446;
+            margin-bottom: 30px;
+            font-weight: 700;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 16px;
+            color: #2d5446;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid rgba(74, 101, 86, 0.2);
+            border-radius: 10px;
+            font-size: 16px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #4a6556;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(74, 101, 86, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 150px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 18px;
+            background: #4a6556;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(74, 101, 86, 0.3);
+        }
+
+        .submit-btn:hover {
+            background: #3d5446;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(74, 101, 86, 0.4);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .social-links {
+            display: flex;
+            gap: 20px;
+            margin-top: 30px;
+            justify-content: center;
+        }
+
+        .social-link {
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #4a6556;
+            color: white;
+            border-radius: 50%;
+            text-decoration: none;
+            font-size: 24px;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        }
+
+        .social-link:hover {
+            background: #3d5446;
+            transform: translateY(-5px) scale(1.1);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .success-message {
+            display: none;
+            padding: 20px;
+            background: #4a6556;
+            color: white;
+            border-radius: 10px;
+            margin-top: 20px;
+            text-align: center;
+            font-size: 16px;
+        }
+
+        /* Login Modal */
+        .login-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .login-modal.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .login-container {
+            background-image: url('1.png');
+            background-size: cover;
+            background-position: center;
+            width: 90%;
+            max-width: 450px;
+            padding: 50px 40px;
+            border-radius: 25px;
+            box-shadow: 0 10px 50px rgba(0,0,0,0.3);
+            position: relative;
+            animation: slideUp 0.4s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .login-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.85);
+            border-radius: 25px;
+            z-index: 1;
+        }
+
+        .login-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            background: #4a6556;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            z-index: 3;
+        }
+
+        .close-btn:hover {
+            background: #3d5446;
+            transform: rotate(90deg);
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .login-header h2 {
+            font-size: 36px;
+            color: #2d5446;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .login-header p {
+            font-size: 16px;
+            color: #4d5d54;
+        }
+
+        .login-form .form-group {
+            margin-bottom: 25px;
+        }
+
+        .login-form label {
+            display: block;
+            font-size: 15px;
+            color: #2d5446;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .login-form input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid rgba(74, 101, 86, 0.2);
+            border-radius: 12px;
+            font-size: 16px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .login-form input:focus {
+            outline: none;
+            border-color: #4a6556;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(74, 101, 86, 0.1);
+        }
+
+        .forgot-password {
+            text-align: right;
+            margin-top: -15px;
+            margin-bottom: 20px;
+        }
+
+        .forgot-password a {
+            color: #4a6556;
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.3s;
+        }
+
+        .forgot-password a:hover {
+            color: #2d5446;
+            text-decoration: underline;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 16px;
+            background: #4a6556;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(74, 101, 86, 0.3);
+        }
+
+        .login-btn:hover {
+            background: #3d5446;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(74, 101, 86, 0.4);
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
+        }
+
+        .divider {
+            text-align: center;
+            margin: 25px 0;
+            position: relative;
+        }
+
+        .divider::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            width: 100%;
+            height: 1px;
+            background: rgba(74, 101, 86, 0.2);
+        }
+
+        .divider span {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 0 15px;
+            color: #4d5d54;
+            font-size: 14px;
+            position: relative;
+        }
+
+        .signup-link {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 15px;
+            color: #4d5d54;
+        }
+
+        .signup-link a {
+            color: #4a6556;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s;
+        }
+
+        .signup-link a:hover {
+            color: #2d5446;
+            text-decoration: underline;
+        }
+
+        .social-login {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .social-login-btn {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid rgba(74, 101, 86, 0.2);
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #2d5446;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .social-login-btn:hover {
+            background: white;
+            border-color: #4a6556;
+            transform: translateY(-2px);
+        }
+
+        .error-message {
+            display: none;
+            padding: 12px;
+            background: #dc3545;
+            color: white;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .loading {
+            pointer-events: none;
+            opacity: 0.6;
+        }
+
+        .loading::after {
+            content: '...';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+
+        /* Dashboard Styles */
+        .dashboard {
+            display: none;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #e8c5b5 0%, #f5e6d3 50%, #c9d9ca 100%);
+            padding-top: 80px;
+        }
+
+        .dashboard.active {
+            display: block;
+        }
+
+        .dashboard-header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 20px 60px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .dashboard-logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: #2d5446;
+            letter-spacing: 1px;
+        }
+
+        .dashboard-nav {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #4a6556;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .logout-btn {
+            padding: 10px 25px;
+            background: #4a6556;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: #3d5446;
+            transform: translateY(-2px);
+        }
+
+        .dashboard-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .search-container {
+            margin-bottom: 40px;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 18px 25px 18px 55px;
+            border: none;
+            border-radius: 50px;
+            font-size: 16px;
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .search-box:focus {
+            outline: none;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+            background: white;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 25px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 20px;
+            color: #4d5d54;
+        }
+
+        .post-card {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            animation: fadeInUp 0.5s ease;
+        }
+
+        .post-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+        }
+
+        .post-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .post-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 15px;
+            background: #98aca0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+            font-weight: 600;
+        }
+
+        .post-avatar.download {
+            background: #4a6556;
+        }
+
+        .post-info h3 {
+            font-size: 20px;
+            color: #2d5446;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .post-time {
+            font-size: 14px;
+            color: #6d7d74;
+        }
+
+        .post-content {
+            font-size: 16px;
+            color: #3d4f45;
+            line-height: 1.6;
+        }
+
+        .create-post-btn {
+            position: fixed;
+            bottom: 40px;
+            right: 40px;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: #4a6556;
+            color: white;
+            border: none;
+            font-size: 32px;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(74, 101, 86, 0.4);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+
+        .create-post-btn:hover {
+            background: #3d5446;
+            transform: scale(1.1);
+            box-shadow: 0 8px 25px rgba(74, 101, 86, 0.5);
+        }
+
+        /* Create Post Modal */
+        .create-post-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .create-post-modal.active {
+            display: flex;
+        }
+
+        .create-post-container {
+            background: white;
+            width: 90%;
+            max-width: 600px;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 50px rgba(0,0,0,0.3);
+            animation: slideUp 0.3s ease;
+        }
+
+        .create-post-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .create-post-header h2 {
+            font-size: 28px;
+            color: #2d5446;
+            font-weight: 700;
+        }
+
+        .create-post-form textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid rgba(74, 101, 86, 0.2);
+            border-radius: 12px;
+            font-size: 16px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            resize: vertical;
+            min-height: 150px;
+            margin-bottom: 20px;
+        }
+
+        .create-post-form textarea:focus {
+            outline: none;
+            border-color: #4a6556;
+            box-shadow: 0 0 0 3px rgba(74, 101, 86, 0.1);
+        }
+
+        .image-upload-section {
+            margin-bottom: 20px;
+        }
+
+        .upload-btn-wrapper {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .upload-btn {
+            width: 100%;
+            padding: 15px;
+            background: rgba(74, 101, 86, 0.1);
+            border: 2px dashed rgba(74, 101, 86, 0.3);
+            border-radius: 12px;
+            color: #4a6556;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .upload-btn:hover {
+            background: rgba(74, 101, 86, 0.15);
+            border-color: #4a6556;
+        }
+
+        .upload-btn-wrapper input[type=file] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .image-preview-container {
+            display: none;
+            margin-top: 15px;
+            position: relative;
+        }
+
+        .image-preview-container.active {
+            display: block;
+        }
+
+        .image-preview {
+            width: 100%;
+            max-height: 300px;
+            object-fit: cover;
+            border-radius: 12px;
+            border: 2px solid rgba(74, 101, 86, 0.2);
+        }
+
+        .remove-image-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 35px;
+            height: 35px;
+            background: rgba(220, 53, 69, 0.9);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .remove-image-btn:hover {
+            background: #dc3545;
+            transform: scale(1.1);
+        }
+
+        .post-image {
+            width: 100%;
+            max-height: 400px;
+            object-fit: cover;
+            border-radius: 12px;
+            margin-top: 15px;
+        }
+
+        .post-actions {
+            display: flex;
+            gap: 15px;
+        }
+
+        .post-btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .post-btn.primary {
+            background: #4a6556;
+            color: white;
+        }
+
+        .post-btn.primary:hover {
+            background: #3d5446;
+            transform: translateY(-2px);
+        }
+
+        .post-btn.secondary {
+            background: #e8e8e8;
+            color: #4d5d54;
+        }
+
+        .post-btn.secondary:hover {
+            background: #d8d8d8;
+        }
+
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+                transform: scale(1);
+            }
+            to {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-header {
+                padding: 15px 20px;
+            }
+
+            .dashboard-container {
+                padding: 20px 15px;
+            }
+
+            .create-post-btn {
+                width: 60px;
+                height: 60px;
+                bottom: 30px;
+                right: 30px;
+            }
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 40px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 50px 40px;
+            border-radius: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+        }
+
+        .feature-icon {
+            width: 90px;
+            height: 90px;
+            margin: 0 auto 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            color: white;
+        }
+
+        .feature-card:nth-child(1) .feature-icon {
+            background: #6b9bd1;
+        }
+
+        .feature-card:nth-child(2) .feature-icon {
+            background: #c9a88f;
+        }
+
+        .feature-card:nth-child(3) .feature-icon {
+            background: #98aca0;
+        }
+
+        .feature-card:nth-child(4) .feature-icon {
+            background: #b5a085;
+        }
+
+        .feature-card h3 {
+            font-size: 26px;
+            color: #2d5446;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .feature-card p {
+            font-size: 18px;
+            color: #4d5d54;
+            line-height: 1.6;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            nav {
+                padding: 15px 30px;
+            }
+
+            .nav-links {
+                gap: 20px;
+                font-size: 14px;
+            }
+
+            .hero h1 {
+                font-size: 42px;
+            }
+
+            .hero p {
+                font-size: 18px;
+            }
+
+            .features h2 {
+                font-size: 40px;
+            }
+
+            .about h2 {
+                font-size: 40px;
+            }
+
+            .contact h2 {
+                font-size: 40px;
+            }
+
+            .about-section {
+                padding: 30px 25px;
+            }
+
+            .about-section h3 {
+                font-size: 26px;
+            }
+
+            .about-intro {
+                font-size: 18px;
+            }
+
+            .contact-intro {
+                font-size: 18px;
+            }
+
+            .contact-content {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+
+            .contact-info,
+            .contact-form {
+                padding: 30px 25px;
+            }
+
+            .closing-message {
+                font-size: 22px;
+                padding: 30px 20px;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Scroll indicator */
+        .scroll-indicator {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateX(-50%) translateY(0);
+            }
+            40% {
+                transform: translateX(-50%) translateY(-20px);
+            }
+            60% {
+                transform: translateX(-50%) translateY(-10px);
+            }
+        }
+
+        .scroll-arrow {
+            width: 30px;
+            height: 30px;
+            border-left: 3px solid #2d5446;
+            border-bottom: 3px solid #2d5446;
+            transform: rotate(-45deg);
+        }
+        /* Post actions dropdown styling */
+.post-actions-menu {
+    position: relative;
+    margin-left: auto;
+}
+
+.post-menu-btn {
+    border: none;
+    background: transparent;
+    font-size: 22px;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 8px;
+    transition: 0.2s;
+    color: #4d5d54;
+}
+
+.post-menu-btn:hover {
+    background: rgba(0,0,0,0.08);
+}
+
+/* Dropdown */
+.post-dropdown {
+    position: absolute;
+    top: 30px;
+    right: 0;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    padding: 10px 0;
+    display: none;
+    width: 160px;
+    z-index: 10;
+}
+
+.post-dropdown.active {
+    display: block;
+}
+
+/* Delete button */
+.post-dropdown button {
+    width: 100%;
+    padding: 12px 15px;
+    border: none;
+    background: transparent;
+    text-align: left;
+    font-size: 15px;
+    font-weight: 600;
+    color: #d9534f;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.post-dropdown button:last-child {
+    border-bottom: none;
+}
+
+.post-dropdown button:hover {
+    background: rgba(217, 83, 79, 0.1);
+    color: #b52b27;
+}
+.scroll-arrow {
+            width: 30px;
+            height: 30px;
+            border-left: 3px solid #2d5446;
+            border-bottom: 3px solid #2d5446;
+            transform: rotate(-45deg);
+        }
+
+        /* Cool Floating Animation for Hero */
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        .hero-content {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        /* Gradient Text Animation */
+        @keyframes gradientShift {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        .hero h1 {
+            background: linear-gradient(45deg, #2d5446, #4a7c65, #6b9bd1, #4a6556);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradientShift 5s ease infinite, fadeInUp 1s ease;
+        }
+
+        /* Pulse Animation for CTA Button */
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 4px 15px rgba(74, 101, 86, 0.3);
+            }
+            50% {
+                box-shadow: 0 4px 30px rgba(74, 101, 86, 0.6);
+            }
+            100% {
+                box-shadow: 0 4px 15px rgba(74, 101, 86, 0.3);
+            }
+        }
+
+        .cta-button {
+            animation: fadeInUp 1s ease 0.4s both, pulse 2s ease-in-out infinite;
+        }
+
+        /* Rotating Border Animation for Feature Cards */
+        .feature-card {
+            position: relative;
+            overflow: hidden;
+            transform-style: preserve-3d;
+            transition: all 0.4s ease;
+            cursor: pointer;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(107, 155, 209, 0.3), transparent);
+            transform: rotate(0deg);
+            transition: all 0.6s ease;
+            z-index: 0;
+        }
+
+        .feature-card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 20px;
+            padding: 3px;
+            background: linear-gradient(45deg, #6b9bd1, #c9a88f, #98aca0, #b5a085);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            z-index: 0;
+        }
+
+        .feature-card:hover::before {
+            transform: rotate(180deg);
+        }
+
+        .feature-card:hover::after {
+            opacity: 1;
+            animation: borderRotate 3s linear infinite;
+        }
+
+        @keyframes borderRotate {
+            0% {
+                filter: hue-rotate(0deg);
+            }
+            100% {
+                filter: hue-rotate(360deg);
+            }
+        }
+
+        .feature-card:hover {
+            transform: translateY(-15px) scale(1.05) rotateX(5deg);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.25), 
+                        0 0 30px rgba(74, 101, 86, 0.4),
+                        inset 0 0 20px rgba(255, 255, 255, 0.1);
+        }
+
+        .feature-card > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .feature-card h3 {
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover h3 {
+            color: #4a7c65;
+            transform: scale(1.05);
+            text-shadow: 0 2px 10px rgba(74, 101, 86, 0.3);
+        }
+
+        .feature-card p {
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover p {
+            color: #2d5446;
+            transform: translateY(-2px);
+        }
+
+        /* Shake Animation for Icons on Hover */
+        @keyframes shake {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-10deg); }
+            75% { transform: rotate(10deg); }
+        }
+
+        .feature-icon {
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover .feature-icon {
+            animation: shake 0.5s ease;
+            transform: scale(1.2);
+        }
+
+        /* Slide-in Animation for About Sections */
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .about-section:nth-child(odd) {
+            animation: slideInLeft 0.8s ease;
+        }
+
+        .about-section:nth-child(even) {
+            animation: slideInRight 0.8s ease;
+        }
+
+        /* Glow Effect for Post Cards */
+        @keyframes glow {
+            0%, 100% {
+                box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            }
+            50% {
+                box-shadow: 0 4px 25px rgba(74, 101, 86, 0.3);
+            }
+        }
+
+        .post-card:hover {
+            animation: glow 2s ease-in-out infinite;
+        }
+
+        /* Typewriter Effect for Hero Paragraph */
+        @keyframes blink {
+            0%, 100% { border-right-color: transparent; }
+            50% { border-right-color: #2d5446; }
+        }
+
+        /* Scale and Rotate Animation for Create Post Button */
+        @keyframes scaleRotate {
+            0%, 100% {
+                transform: scale(1) rotate(0deg);
+            }
+            25% {
+                transform: scale(1.1) rotate(90deg);
+            }
+            50% {
+                transform: scale(1) rotate(180deg);
+            }
+            75% {
+                transform: scale(1.1) rotate(270deg);
+            }
+        }
+
+        .create-post-btn:hover {
+            animation: scaleRotate 0.6s ease-in-out;
+        }
+
+        /* Wave Animation for Navigation */
+        @keyframes wave {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-5px);
+            }
+        }
+
+        .nav-links a:hover {
+            animation: wave 0.5s ease;
+        }
+
+        /* Ripple Effect for Buttons */
+        .cta-button, .login-btn, .post-btn.primary, .submit-btn {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-button::after, .login-btn::after, .post-btn.primary::after, .submit-btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .cta-button:active::after, .login-btn:active::after, 
+        .post-btn.primary:active::after, .submit-btn:active::after {
+            width: 300px;
+            height: 300px;
+        }
+
+        /* Gradient Background Animation */
+        @keyframes gradientBackground {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        .features, .about, .contact {
+            background-size: 200% 200%;
+            animation: gradientBackground 15s ease infinite;
+        }
+
+        /* Bounce Animation for Vision Items */
+        @keyframes bounceIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.3);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.05);
+            }
+            70% {
+                transform: scale(0.9);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .vision-item {
+            animation: bounceIn 0.6s ease;
+        }
+
+        .vision-item:nth-child(1) { animation-delay: 0.1s; }
+        .vision-item:nth-child(2) { animation-delay: 0.2s; }
+        .vision-item:nth-child(3) { animation-delay: 0.3s; }
+        .vision-item:nth-child(4) { animation-delay: 0.4s; }
+
+        /* Particle Effect Background */
+        @keyframes particles {
+            0%, 100% {
+                transform: translateY(0) translateX(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) translateX(100px);
+                opacity: 0;
+            }
+        }
+
+        /* Swing Animation for Social Links */
+        @keyframes swing {
+            0%, 100% { transform: translateY(-5px) rotate(-5deg); }
+            50% { transform: translateY(-5px) rotate(5deg); }
+        }
+
+        .social-link:hover {
+            animation: swing 0.5s ease infinite;
+        }
+
+        /* Neon Glow for Logo */
+        @keyframes neonGlow {
+            0%, 100% {
+                text-shadow: 0 0 10px rgba(74, 101, 86, 0.5);
+            }
+            50% {
+                text-shadow: 0 0 20px rgba(74, 101, 86, 0.8), 0 0 30px rgba(74, 101, 86, 0.6);
+            }
+        }
+
+        .logo:hover, .dashboard-logo:hover {
+            animation: neonGlow 1.5s ease-in-out infinite;
+            cursor: pointer;
+        }
+
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="logo">STUDENTHOOD</div>
+        <ul class="nav-links">
+            <li><a href="#home">Home</a></li>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#contact">Contact</a></li>
+        </ul>
+    </nav>
+
+    <section class="hero" id="home">
+        <div class="hero-content">
+            <h1>Connect and Share on Campus</h1>
+            <p>A social platform for students to share moments, trade resources, and join campus communities</p>
+            <a href="#" class="cta-button" id="getStartedBtn">Get Started</a>
+        </div>
+        <div class="scroll-indicator">
+            <div class="scroll-arrow"></div>
+        </div>
+    </section>
+
+    <section class="features" id="features">
+        <h2>Features</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">📋</div>
+                <h3>Share Notes & Study Resources</h3>
+                <p>Access and share study materials effortlessly</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔄</div>
+                <h3>Borrow / Rent / Lend System</h3>
+                <p>Easily borrow and lend everyday items on campus</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🚗</div>
+                <h3>Ride Sharing / Cab Sharing</h3>
+                <p>Share cabs and find students going your way</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔍</div>
+                <h3>Lost & Found Hub</h3>
+                <p>Help students recover lost items on campus</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="about" id="about">
+        <div class="about-container">
+            <h2><span>🌿</span> About Us</h2>
+            
+            <div class="about-intro">
+                Studenthood is built with one simple belief: campus life should feel connected, convenient, and community-driven. Every student deserves an easy way to access resources, meet new people, share knowledge, and navigate everyday campus needs — all in one place.
+            </div>
+
+            <div class="about-section">
+                <p>
+                    As students, we saw a common problem: everything on campus is scattered — notes in different groups, items in random chats, cab-sharing in private circles, and lost belongings hidden in 100 WhatsApp messages. Nothing was unified. Nothing was organized. Nothing was easy.
+                </p>
+                <p>
+                    So we created <strong>Studenthood</strong>, a platform built for students, by students, designed to bring the entire campus experience together.
+                </p>
+            </div>
+
+            <div class="about-section">
+                <h3><span>🌟</span> Our Mission</h3>
+                <p>
+                    To empower students with a clean, simple, and trusted platform that helps them:
+                </p>
+                <ul>
+                    <li>Share study resources effortlessly</li>
+                    <li>Borrow and lend everyday essentials</li>
+                    <li>Connect through ride-sharing</li>
+                    <li>Recover lost items quickly</li>
+                    <li>Stay updated with what's happening around campus</li>
+                </ul>
+                <p style="margin-top: 25px;">
+                    We want to turn small everyday problems into smooth, effortless experiences.
+                </p>
+            </div>
+
+            <div class="about-section">
+                <h3><span>🤝</span> Why We Exist</h3>
+                <p>
+                    Campus life is more than classrooms — it's community, collaboration, and shared experiences. Studenthood helps students support each other, save money, reduce waste, and build meaningful connections within their college environment.
+                </p>
+                <p><strong>Our platform encourages:</strong></p>
+                <div class="vision-grid">
+                    <div class="vision-item">
+                        <h4>Peer-to-peer Help</h4>
+                        <p>Students supporting students in meaningful ways</p>
+                    </div>
+                    <div class="vision-item">
+                        <h4>Sustainable Sharing</h4>
+                        <p>Reduce waste by sharing resources efficiently</p>
+                    </div>
+                    <div class="vision-item">
+                        <h4>Real Community</h4>
+                        <p>Build authentic connections and interactions</p>
+                    </div>
+                    <div class="vision-item">
+                        <h4>Trusted Network</h4>
+                        <p>A safer campus environment for everyone</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="about-section">
+                <h3><span>🚀</span> Our Vision</h3>
+                <p>
+                    To build the most helpful, student-driven companion app for every campus — a single destination where students can find anything, share anything, and connect with anyone they need.
+                </p>
+                <p>
+                    Studenthood is not just an app. It's a <strong>campus ecosystem</strong>, designed to grow with the needs of students.
+                </p>
+            </div>
+
+            <div class="closing-message">
+                🌱 Welcome to Studenthood — your campus, connected.
+            </div>
+        </div>
+    </section>
+
+    <section class="contact" id="contact">
+        <div class="contact-container">
+            <h2>📬 Contact Us</h2>
+            
+            <div class="contact-intro">
+                Have questions, feedback, or ideas? We'd love to hear from you! Whether you're a student, educator, or just curious about Studenthood, feel free to reach out.
+            </div>
+
+            <div class="contact-content">
+                <div class="contact-info">
+                    <h3>Get in Touch</h3>
+                    
+                    <div class="contact-item">
+                        <div class="contact-icon">📧</div>
+                        <div class="contact-details">
+                            <h4>Email Us</h4>
+                            <p><a href="mailto:hello@studenthood.com">hello@studenthood.com</a></p>
+                            <p>We'll respond within 24 hours</p>
+                        </div>
+                    </div>
+
+                    <div class="contact-item">
+                        <div class="contact-icon">💬</div>
+                        <div class="contact-details">
+                            <h4>Support</h4>
+                            <p><a href="mailto:support@studenthood.com">support@studenthood.com</a></p>
+                            <p>For technical issues and help</p>
+                        </div>
+                    </div>
+
+                    <div class="contact-item">
+                        <div class="contact-icon">🤝</div>
+                        <div class="contact-details">
+                            <h4>Partnerships</h4>
+                            <p><a href="mailto:partner@studenthood.com">partner@studenthood.com</a></p>
+                            <p>Collaborate with us on campus</p>
+                        </div>
+                    </div>
+
+                    <div class="contact-item">
+                        <div class="contact-icon">📍</div>
+                        <div class="contact-details">
+                            <h4>Location</h4>
+                            <p>Campus Innovation Hub</p>
+                            <p>Building Community, One Campus at a Time</p>
+                        </div>
+                    </div>
+
+                    <div class="social-links">
+                        <a href="#" class="social-link" title="Instagram">📷</a>
+                        <a href="#" class="social-link" title="Twitter">🐦</a>
+                        <a href="#" class="social-link" title="LinkedIn">💼</a>
+                        <a href="#" class="social-link" title="Facebook">👥</a>
+                    </div>
+                </div>
+
+                <div class="contact-form">
+                    <h3>Send Us a Message</h3>
+                    <form id="contactForm">
+                        <div class="form-group">
+                            <label for="name">Your Name *</label>
+                            <input type="text" id="name" name="name" required placeholder="Enter your full name">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="email">Your Email *</label>
+                            <input type="email" id="email" name="email" required placeholder="your.email@example.com">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="subject">Subject *</label>
+                            <input type="text" id="subject" name="subject" required placeholder="What's this about?">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="message">Your Message *</label>
+                            <textarea id="message" name="message" required placeholder="Tell us more..."></textarea>
+                        </div>
+
+                        <button type="submit" class="submit-btn">Send Message</button>
+                        <div class="success-message" id="successMessage">
+                            ✅ Thank you! Your message has been sent successfully. We'll get back to you soon!
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Dashboard -->
+    <div class="dashboard" id="dashboard">
+        <header class="dashboard-header">
+            <div class="dashboard-logo">STUDENTHOOD</div>
+            <div class="dashboard-nav">
+                <div class="user-info">
+                    <div class="user-avatar" id="userAvatar">U</div>
+                    <span id="userName" style="color: #2d5446; font-weight: 600;"></span>
+                </div>
+                <button class="logout-btn" id="logoutBtn">Log Out</button>
+            </div>
+        </header>
+
+        <div class="dashboard-container">
+            <div class="search-container" style="position: relative;">
+                <span class="search-icon">🔍</span>
+                <input type="text" class="search-box" placeholder="Search" id="searchBox">
+            </div>
+
+            <div id="postsContainer">
+                <!-- Sample posts -->
+                <div class="post-card">
+                    <div class="post-header">
+                        <div class="post-avatar">A</div>
+                        <div class="post-info">
+                            <h3>Ananya</h3>
+                            <span class="post-time">2h ago</span>
+                        </div>
+                    </div>
+                    <div class="post-content">
+                        Enjoying the campus festival today!
+                    </div>
+                </div>
+
+                <div class="post-card">
+                    <div class="post-header">
+                        <div class="post-avatar download">↓</div>
+                        <div class="post-info">
+                            <h3>Arjun</h3>
+                            <span class="post-time">2h ago</span>
+                        </div>
+                    </div>
+                    <div class="post-content">
+                        Recent Economics Notes
+                    </div>
+                </div>
+
+                <div class="post-card">
+                    <div class="post-header">
+                        <div class="post-avatar">S</div>
+                        <div class="post-info">
+                            <h3>Sanjay</h3>
+                            <span class="post-time">3h ago</span>
+                        </div>
+                    </div>
+                    <div class="post-content">
+                        A beautiful evening on campus
+                    </div>
+                </div>
+
+                <div class="post-card">
+                    <div class="post-header">
+                        <div class="post-avatar">N</div>
+                        <div class="post-info">
+                            <h3>Neha</h3>
+                            <span class="post-time">3h ago</span>
+                        </div>
+                    </div>
+                    <div class="post-content">
+                        Anyone want to join for a study session this evening?
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button class="create-post-btn" id="createPostBtn">+</button>
+    </div>
+
+    <!-- Image Modal -->
+    <div class="image-modal" id="imageModal">
+        <button class="image-modal-close" id="closeImageModal">×</button>
+        <img id="modalImage" src="" alt="Full size image">
+    </div>
+
+    <!-- Create Post Modal -->
+    <div class="create-post-modal" id="createPostModal">
+        <div class="create-post-container">
+            <div class="create-post-header">
+                <h2>Create Post</h2>
+                <button class="close-btn" id="closeCreatePost">×</button>
+            </div>
+            <form class="create-post-form" id="createPostForm">
+                <textarea id="postContent" placeholder="What's on your mind?" required></textarea>
+                
+                <div class="image-upload-section">
+                    <div class="upload-btn-wrapper">
+                        <button type="button" class="upload-btn">
+                            <span>📷</span>
+                            <span id="uploadBtnText">Add Photo</span>
+                        </button>
+                        <input type="file" id="imageUpload" accept="image/*">
+                    </div>
+                    <div class="image-preview-container" id="imagePreviewContainer">
+                        <img id="imagePreview" class="image-preview" alt="Preview">
+                        <button type="button" class="remove-image-btn" id="removeImageBtn">×</button>
+                    </div>
+                </div>
+
+                <div class="post-actions">
+                    <button type="button" class="post-btn secondary" id="cancelPost">Cancel</button>
+                    <button type="submit" class="post-btn primary">Post</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div class="login-modal" id="loginModal">
+        <div class="login-container">
+            <div class="login-overlay"></div>
+            <button class="close-btn" id="closeLogin">×</button>
+            <div class="login-content">
+                <div class="login-header">
+                    <h2>Welcome Back!</h2>
+                    <p>Log in to connect with your campus community</p>
+                </div>
+                
+                <div class="error-message" id="loginError"></div>
+                
+                <form class="login-form" id="loginForm">
+                    <div class="form-group">
+                        <label for="loginEmail">Email Address</label>
+                        <input type="email" id="loginEmail" name="email" required placeholder="your.email@university.edu">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="loginPassword">Password</label>
+                        <input type="password" id="loginPassword" name="password" required placeholder="Enter your password">
+                    </div>
+
+                    <div class="forgot-password">
+                        <a href="#forgot">Forgot Password?</a>
+                    </div>
+
+                    <button type="submit" class="login-btn">Log In</button>
+
+                    <div class="divider">
+                        <span>OR</span>
+                    </div>
+
+                    <button type="button" class="social-login-btn" id="googleLogin" style="width: 100%;">
+                        <span>🔍</span> Continue with Google
+                    </button>
+
+                    <div class="signup-link">
+                        Don't have an account? <a href="#" id="signupLink">Sign Up</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sign Up Modal -->
+    <div class="login-modal" id="signupModal">
+        <div class="login-container">
+            <div class="login-overlay"></div>
+            <button class="close-btn" id="closeSignup">×</button>
+            <div class="login-content">
+                <div class="login-header">
+                    <h2>Join Studenthood!</h2>
+                    <p>Create your account and connect with your campus</p>
+                </div>
+                
+                <div class="error-message" id="signupError"></div>
+                
+                <form class="login-form" id="signupForm">
+                    <div class="form-group">
+                        <label for="signupName">Full Name</label>
+                        <input type="text" id="signupName" name="name" required placeholder="Enter your full name">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="signupEmail">Email Address</label>
+                        <input type="email" id="signupEmail" name="email" required placeholder="your.email@university.edu">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="signupPassword">Password</label>
+                        <input type="password" id="signupPassword" name="password" required placeholder="Create a strong password">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="signupConfirmPassword">Confirm Password</label>
+                        <input type="password" id="signupConfirmPassword" name="confirmPassword" required placeholder="Re-enter your password">
+                    </div>
+
+                    <button type="submit" class="login-btn">Sign Up</button>
+
+                    <div class="divider">
+                        <span>OR</span>
+                    </div>
+
+                    <button type="button" class="social-login-btn" id="googleSignup" style="width: 100%;">
+                        <span>🔍</span> Sign up with Google
+                    </button>
+
+                    <div class="signup-link">
+                        Already have an account? <a href="#" id="loginLink">Log In</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div id="postsContainer"></div>
+    <input type="text" class="search-box" id="searchBox" placeholder="Search">
+
+
+
+    <script>
+        // Initialize Supabase
+        const SUPABASE_URL = 'https://vehaakunkgxwuzdrlfut.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZlaGFha3Vua2d4d3V6ZHJsZnV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ0MjQ3NTUsImV4cCI6MjA4MDAwMDc1NX0.9ZIY7yMIk_eygIw-Q9YJStc8d9HTp_kswJ2Uuq2JQJo';
+        
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // Elements
+        const landingPage = document.querySelector('body > nav').parentElement;
+        const dashboard = document.getElementById('dashboard');
+        const createPostModal = document.getElementById('createPostModal');
+        const createPostBtn = document.getElementById('createPostBtn');
+        const closeCreatePost = document.getElementById('closeCreatePost');
+        const cancelPost = document.getElementById('cancelPost');
+        const createPostForm = document.getElementById('createPostForm');
+        const postsContainer = document.getElementById('postsContainer');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const userAvatar = document.getElementById('userAvatar');
+        const userName = document.getElementById('userName');
+
+        let currentUser = null;
+        let selectedImage = null;
+        let imageFile = null;
+
+        // Image modal elements
+        const imageModal = document.getElementById('imageModal');
+        const modalImage = document.getElementById('modalImage');
+        const closeImageModal = document.getElementById('closeImageModal');
+
+        // Close image modal
+        closeImageModal.addEventListener('click', function(e) {
+            e.stopPropagation();
+            imageModal.classList.remove('active');
+        });
+
+        imageModal.addEventListener('click', function() {
+            imageModal.classList.remove('active');
+        });
+
+        modalImage.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+
+        // Image upload handling
+        const imageUpload = document.getElementById('imageUpload');
+        const imagePreview = document.getElementById('imagePreview');
+        const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+        const removeImageBtn = document.getElementById('removeImageBtn');
+        const uploadBtnText = document.getElementById('uploadBtnText');
+
+        imageUpload.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file && file.type.startsWith('image/')) {
+                imageFile = file;
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    selectedImage = e.target.result;
+                    imagePreview.src = selectedImage;
+                    imagePreviewContainer.classList.add('active');
+                    uploadBtnText.textContent = 'Change Photo';
+                };
+                
+                reader.readAsDataURL(file);
+            }
+        });
+
+        removeImageBtn.addEventListener('click', function() {
+            selectedImage = null;
+            imageFile = null;
+            imagePreview.src = '';
+            imagePreviewContainer.classList.remove('active');
+            imageUpload.value = '';
+            uploadBtnText.textContent = 'Add Photo';
+        });
+
+        // Check if user is already logged in
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            if (session) {
+                currentUser = session.user;
+                showDashboard(session.user);
+            }
+        });
+
+        // Listen for auth state changes
+        supabase.auth.onAuthStateChange((event, session) => {
+            console.log('Auth event:', event, session);
+            if (event === 'SIGNED_IN' && session) {
+                currentUser = session.user;
+                showDashboard(session.user);
+            } else if (event === 'SIGNED_OUT') {
+                currentUser = null;
+                showLandingPage();
+            }
+        });
+
+        // Show dashboard function
+        function showDashboard(user) {
+            // Hide all sections
+            document.querySelectorAll('nav, .hero, .features, .about, .contact').forEach(el => {
+                el.style.display = 'none';
+            });
+            
+            // Show dashboard
+            dashboard.classList.add('active');
+            
+            // Set user info
+            const name = user.user_metadata?.full_name || user.email.split('@')[0];
+            userName.textContent = name;
+            userAvatar.textContent = name.charAt(0).toUpperCase();
+            
+            // Load posts
+            loadPosts();
+        }
+
+        // Show landing page function
+        function showLandingPage() {
+            dashboard.classList.remove('active');
+            document.querySelectorAll('nav, .hero, .features, .about, .contact').forEach(el => {
+                el.style.display = '';
+            });
+        }
+
+        // Logout function
+        logoutBtn.addEventListener('click', async function() {
+            try {
+                const { error } = await supabase.auth.signOut();
+                if (error) throw error;
+                alert('Logged out successfully!');
+            } catch (error) {
+                console.error('Logout error:', error);
+                alert('Error logging out. Please try again.');
+            }
+        });
+
+        // Create post modal controls
+        createPostBtn.addEventListener('click', function() {
+            createPostModal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        });
+
+        closeCreatePost.addEventListener('click', function() {
+            createPostModal.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        });
+
+        cancelPost.addEventListener('click', function() {
+            createPostModal.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        });
+
+        createPostModal.addEventListener('click', function(e) {
+            if (e.target === createPostModal) {
+                createPostModal.classList.remove('active');
+                document.body.style.overflow = 'auto';
+            }
+        });
+
+        // Create post form submission
+        createPostForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            if (!currentUser) {
+                alert('Please log in to create a post');
+                return;
+            }
+
+            const content = document.getElementById('postContent').value.trim();
+            
+            if (!content) {
+                alert('Please write something!');
+                return;
+            }
+
+            const submitBtn = createPostForm.querySelector('.post-btn.primary');
+            submitBtn.classList.add('loading');
+            submitBtn.textContent = 'Posting';
+
+            try {
+                let imageUrl = null;
+
+                // Upload image to Supabase Storage if selected
+                if (imageFile) {
+                    const fileExt = imageFile.name.split('.').pop();
+                    const fileName = `${currentUser.id}-${Date.now()}.${fileExt}`;
+                    const filePath = fileName;
+
+                    const { data: uploadData, error: uploadError } = await supabase.storage
+                        .from('post-images')
+                        .upload(filePath, imageFile, {
+                            cacheControl: '3600',
+                            upsert: false
+                        });
+
+                    if (uploadError) {
+                        console.error('Image upload error:', uploadError);
+                        throw new Error('Failed to upload image: ' + uploadError.message);
+                    }
+
+                    // Get public URL
+                    const { data: urlData } = supabase.storage
+                        .from('post-images')
+                        .getPublicUrl(filePath);
+                    
+                    imageUrl = urlData.publicUrl;
+                }
+
+                // Insert post into Supabase
+                const { data, error } = await supabase
+                    .from('posts')
+                    .insert([
+                        {
+                            user_id: currentUser.id,
+                            content: content,
+                            image_url: imageUrl,
+                            author_name: currentUser.user_metadata?.full_name || currentUser.email.split('@')[0],
+                            author_email: currentUser.email
+                        }
+                    ])
+                    .select();
+
+                if (error) throw error;
+
+                // Add post to UI
+                addPostToUI(data[0]);
+                
+                // Close modal and reset form
+                createPostModal.classList.remove('active');
+                document.body.style.overflow = 'auto';
+                createPostForm.reset();
+                
+                // Reset image
+                selectedImage = null;
+                imageFile = null;
+                imagePreview.src = '';
+                imagePreviewContainer.classList.remove('active');
+                imageUpload.value = '';
+                uploadBtnText.textContent = 'Add Photo';
+                
+            } catch (error) {
+                console.error('Create post error:', error);
+                alert('Failed to create post. Please try again.');
+            } finally {
+                submitBtn.classList.remove('loading');
+                submitBtn.textContent = 'Post';
+            }
+        });
+
+        // Load posts function
+        async function loadPosts() {
+            try {
+                const { data, error } = await supabase
+                    .from('posts')
+                    .select('*')
+                    .order('created_at', { ascending: false })
+                    .limit(20);
+
+                if (error) throw error;
+
+                // Clear existing posts except sample ones
+                // For now, we'll append new posts to the top
+                if (data && data.length > 0) {
+                    data.forEach(post => {
+                        addPostToUI(post, true);
+                    });
+                }
+            } catch (error) {
+                console.error('Load posts error:', error);
+            }
+        }
+
+        // Add post to UI
+        function addPostToUI(post, prepend = true) {
+            const postCard = document.createElement('div');
+            postCard.className = 'post-card';
+            postCard.dataset.postId = post.id;
+            
+            const authorInitial = post.author_name.charAt(0).toUpperCase();
+            const timeAgo = getTimeAgo(new Date(post.created_at));
+            
+            // Check if current user owns this post
+            const isOwner = currentUser && currentUser.id === post.user_id;
+            const menuHtml = isOwner ? `
+                <div class="post-actions-menu">
+                    <button class="post-menu-btn" onclick="togglePostMenu(event, '${post.id}')">⋮</button>
+                    <div class="post-dropdown" id="menu-${post.id}">
+                        <button onclick="deletePost('${post.id}', '${post.image_url || ''}')">🗑️ Delete Post</button>
+                    </div>
+                </div>
+            ` : '';
+            
+            const imageHtml = post.image_url ? `<img src="${post.image_url}" alt="Post image" class="post-image" onclick="openImageModal('${post.image_url}')">` : '';
+            
+            postCard.innerHTML = `
+                <div class="post-header">
+                    <div class="post-avatar">${authorInitial}</div>
+                    <div class="post-info">
+                        <h3>${post.author_name}</h3>
+                        <span class="post-time">${timeAgo}</span>
+                    </div>
+                    ${menuHtml}
+                </div>
+                <div class="post-content">
+                    ${escapeHtml(post.content)}
+                </div>
+                ${imageHtml}
+            `;
+            
+            if (prepend) {
+                postsContainer.insertBefore(postCard, postsContainer.firstChild);
+            } else {
+                postsContainer.appendChild(postCard);
+            }
+        }
+
+        // Escape HTML to prevent XSS
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Toggle post menu
+        window.togglePostMenu = function(event, postId) {
+            event.stopPropagation();
+            const menu = document.getElementById(`menu-${postId}`);
+            
+            // Close all other menus
+            document.querySelectorAll('.post-dropdown').forEach(m => {
+                if (m.id !== `menu-${postId}`) {
+                    m.classList.remove('active');
+                }
+            });
+            
+            menu.classList.toggle('active');
+        };
+
+        // Close menus when clicking outside
+        document.addEventListener('click', function() {
+            document.querySelectorAll('.post-dropdown').forEach(m => {
+                m.classList.remove('active');
+            });
+        });
+
+        // Open image modal
+        window.openImageModal = function(imageUrl) {
+            modalImage.src = imageUrl;
+            imageModal.classList.add('active');
+        };
+
+        // Delete post function
+        window.deletePost = async function(postId, imageUrl) {
+            if (!confirm('Are you sure you want to delete this post?')) {
+                return;
+            }
+
+            try {
+                // Delete image from storage if exists
+                if (imageUrl) {
+                    const urlParts = imageUrl.split('/');
+                    const fileName = urlParts[urlParts.length - 1];
+                    
+                    await supabase.storage
+                        .from('post-images')
+                        .remove([fileName]);
+                }
+
+                // Delete post from database
+                const { error } = await supabase
+                    .from('posts')
+                    .delete()
+                    .eq('id', postId);
+
+                if (error) throw error;
+
+                // Remove post from UI
+                const postCard = document.querySelector(`[data-post-id="${postId}"]`);
+                if (postCard) {
+                    postCard.style.animation = 'fadeOut 0.3s ease';
+                    setTimeout(() => {
+                        postCard.remove();
+                    }, 300);
+                }
+
+                alert('Post deleted successfully!');
+            } catch (error) {
+                console.error('Delete post error:', error);
+                alert('Failed to delete post. Please try again.');
+            }
+        };
+
+        // Get time ago helper
+        function getTimeAgo(date) {
+            const seconds = Math.floor((new Date() - date) / 1000);
+            
+            if (seconds < 60) return 'Just now';
+            if (seconds < 3600) return Math.floor(seconds / 60) + 'm ago';
+            if (seconds < 86400) return Math.floor(seconds / 3600) + 'h ago';
+            return Math.floor(seconds / 86400) + 'd ago';
+        }
+
+        // Login Modal functionality
+        const loginModal = document.getElementById('loginModal');
+        const signupModal = document.getElementById('signupModal');
+        const getStartedBtn = document.getElementById('getStartedBtn');
+        const closeLoginBtn = document.getElementById('closeLogin');
+        const closeSignupBtn = document.getElementById('closeSignup');
+        const loginForm = document.getElementById('loginForm');
+        const signupForm = document.getElementById('signupForm');
+        const signupLink = document.getElementById('signupLink');
+        const loginLink = document.getElementById('loginLink');
+        const loginError = document.getElementById('loginError');
+        const signupError = document.getElementById('signupError');
+
+        // Helper function to show error
+        function showError(element, message) {
+            element.textContent = message;
+            element.classList.add('show');
+            setTimeout(() => {
+                element.classList.remove('show');
+            }, 5000);
+        }
+
+        // Open login modal when Get Started is clicked
+        getStartedBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            loginModal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        });
+
+        // Close login modal
+        closeLoginBtn.addEventListener('click', function() {
+            loginModal.classList.remove('active');
+            document.body.style.overflow = 'auto';
+            loginError.classList.remove('show');
+        });
+
+        // Close signup modal
+        closeSignupBtn.addEventListener('click', function() {
+            signupModal.classList.remove('active');
+            document.body.style.overflow = 'auto';
+            signupError.classList.remove('show');
+        });
+
+        // Switch to signup modal
+        signupLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            loginModal.classList.remove('active');
+            signupModal.classList.add('active');
+            loginError.classList.remove('show');
+        });
+
+        // Switch to login modal
+        loginLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            signupModal.classList.remove('active');
+            loginModal.classList.add('active');
+            signupError.classList.remove('show');
+        });
+
+        // Close modal when clicking outside
+        loginModal.addEventListener('click', function(e) {
+            if (e.target === loginModal) {
+                loginModal.classList.remove('active');
+                document.body.style.overflow = 'auto';
+                loginError.classList.remove('show');
+            }
+        });
+
+        signupModal.addEventListener('click', function(e) {
+            if (e.target === signupModal) {
+                signupModal.classList.remove('active');
+                document.body.style.overflow = 'auto';
+                signupError.classList.remove('show');
+            }
+        });
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                if (loginModal.classList.contains('active')) {
+                    loginModal.classList.remove('active');
+                    document.body.style.overflow = 'auto';
+                    loginError.classList.remove('show');
+                }
+                if (signupModal.classList.contains('active')) {
+                    signupModal.classList.remove('active');
+                    document.body.style.overflow = 'auto';
+                    signupError.classList.remove('show');
+                }
+            }
+        });
+
+        // Handle login form submission
+        loginForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const submitBtn = loginForm.querySelector('.login-btn');
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            // Show loading state
+            submitBtn.classList.add('loading');
+            submitBtn.textContent = 'Logging in';
+            loginError.classList.remove('show');
+            
+            try {
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email: email,
+                    password: password,
+                });
+
+                if (error) throw error;
+
+                // Success
+                alert('Login successful! Welcome to Studenthood 🎉');
+                loginModal.classList.remove('active');
+                document.body.style.overflow = 'auto';
+                loginForm.reset();
+                
+                // Dashboard will show automatically via auth state change
+                
+            } catch (error) {
+                console.error('Login error:', error);
+                showError(loginError, error.message || 'Login failed. Please try again.');
+            } finally {
+                submitBtn.classList.remove('loading');
+                submitBtn.textContent = 'Log In';
+            }
+        });
+
+        // Handle signup form submission
+        signupForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const submitBtn = signupForm.querySelector('.login-btn');
+            const name = document.getElementById('signupName').value;
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+            const confirmPassword = document.getElementById('signupConfirmPassword').value;
+            
+            // Validate passwords match
+            if (password !== confirmPassword) {
+                showError(signupError, 'Passwords do not match! Please try again.');
+                return;
+            }
+
+            // Validate password length
+            if (password.length < 6) {
+                showError(signupError, 'Password must be at least 6 characters long.');
+                return;
+            }
+            
+            // Show loading state
+            submitBtn.classList.add('loading');
+            submitBtn.textContent = 'Creating account';
+            signupError.classList.remove('show');
+            
+            try {
+                const { data, error } = await supabase.auth.signUp({
+                    email: email,
+                    password: password,
+                    options: {
+                        data: {
+                            full_name: name,
+                        }
+                    }
+                });
+
+                if (error) throw error;
+
+                // Success
+                alert('Account created successfully! Please check your email to verify your account. 🎉');
+                signupModal.classList.remove('active');
+                document.body.style.overflow = 'auto';
+                signupForm.reset();
+                
+                // Dashboard will show automatically after email verification
+                
+            } catch (error) {
+                console.error('Signup error:', error);
+                showError(signupError, error.message || 'Signup failed. Please try again.');
+            } finally {
+                submitBtn.classList.remove('loading');
+                submitBtn.textContent = 'Sign Up';
+            }
+        });
+
+        // Google login button
+        document.getElementById('googleLogin').addEventListener('click', async function() {
+            const btn = this;
+            btn.classList.add('loading');
+            btn.textContent = 'Connecting to Google';
+            
+            try {
+                const { data, error } = await supabase.auth.signInWithOAuth({
+                    provider: 'google',
+                    options: {
+                        redirectTo: window.location.origin
+                    }
+                });
+
+                if (error) throw error;
+                
+            } catch (error) {
+                console.error('Google login error:', error);
+                
+                // Check if it's the provider not enabled error
+                if (error.message && error.message.includes('not enabled')) {
+                    showError(loginError, 'Google Sign-In is not yet configured. Please use email/password login for now.');
+                } else {
+                    showError(loginError, 'Google login failed. Please try again.');
+                }
+            } finally {
+                btn.classList.remove('loading');
+                btn.innerHTML = '<span>🔍</span> Continue with Google';
+            }
+        });
+
+        // Google signup button
+        document.getElementById('googleSignup').addEventListener('click', async function() {
+            const btn = this;
+            btn.classList.add('loading');
+            btn.textContent = 'Connecting to Google';
+            
+            try {
+                const { data, error } = await supabase.auth.signInWithOAuth({
+                    provider: 'google',
+                    options: {
+                        redirectTo: window.location.origin
+                    }
+                });
+
+                if (error) throw error;
+                
+            } catch (error) {
+                console.error('Google signup error:', error);
+                
+                // Check if it's the provider not enabled error
+                if (error.message && error.message.includes('not enabled')) {
+                    showError(signupError, 'Google Sign-Up is not yet configured. Please use email/password signup for now.');
+                } else {
+                    showError(signupError, 'Google signup failed. Please try again.');
+                }
+            } finally {
+                btn.classList.remove('loading');
+                btn.innerHTML = '<span>🔍</span> Sign up with Google';
+            }
+        });
+
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Add scroll effect to navigation
+        let lastScroll = 0;
+        const nav = document.querySelector('nav');
+
+        window.addEventListener('scroll', () => {
+            const currentScroll = window.pageYOffset;
+            
+            if (currentScroll <= 0) {
+                nav.style.boxShadow = '0 2px 10px rgba(0,0,0,0.1)';
+            } else {
+                nav.style.boxShadow = '0 4px 20px rgba(0,0,0,0.15)';
+            }
+            
+            lastScroll = currentScroll;
+        });
+
+        // Intersection Observer for feature cards animation
+        const observerOptions = {
+            threshold: 0.2,
+            rootMargin: '0px 0px -100px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.feature-card, .about-section, .vision-item').forEach(card => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(30px)';
+            card.style.transition = 'all 0.6s ease';
+            observer.observe(card);
+        });
+
+        // Contact form submission
+        document.getElementById('contactForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get form values
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const subject = document.getElementById('subject').value;
+            const message = document.getElementById('message').value;
+            
+            // Show success message
+            const successMessage = document.getElementById('successMessage');
+            successMessage.style.display = 'block';
+            
+            // Reset form
+            this.reset();
+            
+            // Hide success message after 5 seconds
+            setTimeout(() => {
+                successMessage.style.display = 'none';
+            }, 5000);
+            
+            // In a real application, you would send this data to a server
+            console.log('Form submitted:', { name, email, subject, message });
+        });
+
+        // Animate contact items
+        document.querySelectorAll('.contact-item, .contact-form, .contact-info').forEach(item => {
+            item.style.opacity = '0';
+            item.style.transform = 'translateY(30px)';
+            item.style.transition = 'all 0.6s ease';
+            observer.observe(item);
+        });
+        // ---------------------------
+// LIVE SEARCH FOR POSTS
+// ---------------------------
+const searchBox = document.getElementById("searchBox");
+
+searchBox.addEventListener("input", function () {
+    const searchTerm = searchBox.value.toLowerCase().trim();
+
+    const posts = document.querySelectorAll(".post-card");
+
+    posts.forEach(post => {
+        const text = post.innerText.toLowerCase();
+
+        if (text.includes(searchTerm)) {
+            post.style.display = "block";   // show
+        } else {
+            post.style.display = "none";    // hide
+        }
+    });
+});
+
+    </script>
+</body>
+</html>     
