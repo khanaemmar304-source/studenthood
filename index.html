@@ -1783,6 +1783,29 @@
             animation: neonGlow 1.5s ease-in-out infinite;
             cursor: pointer;
         }
+        .image-modal {
+    display: none !important;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.8);
+    justify-content: center;
+    align-items: center;
+    z-index: 4000;
+}
+/* Footer Styling */
+footer {
+    background-color: #2d5446; /* Use the logo's dark green color */
+    color: #ffffff;
+    text-align: center;
+    padding: 20px 0;
+    font-size: 16px; /* Increase font size */
+    margin-top: 40px; /* Add some space above the footer */
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+}
+
 
     </style>
 </head>
@@ -2000,82 +2023,63 @@
     </section>
 
     <!-- Dashboard -->
-    <div class="dashboard" id="dashboard">
-        <header class="dashboard-header">
-            <div class="dashboard-logo">STUDENTHOOD</div>
-            <div class="dashboard-nav">
-                <div class="user-info">
-                    <div class="user-avatar" id="userAvatar">U</div>
-                    <span id="userName" style="color: #2d5446; font-weight: 600;"></span>
-                </div>
-                <button class="logout-btn" id="logoutBtn">Log Out</button>
+<div class="dashboard" id="dashboard">
+    <header class="dashboard-header">
+        <div class="dashboard-logo">STUDENTHOOD</div>
+
+        <div class="dashboard-nav">
+            <div class="user-info">
+                <div class="user-avatar" id="userAvatar">U</div>
+                <span id="userName" style="color: #2d5446; font-weight: 600;"></span>
             </div>
-        </header>
+            <button class="logout-btn" id="logoutBtn">Log Out</button>
+        </div>
+    </header>
 
-        <div class="dashboard-container">
-            <div class="search-container" style="position: relative;">
-                <span class="search-icon">🔍</span>
-                <input type="text" class="search-box" placeholder="Search" id="searchBox">
-            </div>
+    <div class="dashboard-container">
 
-            <div id="postsContainer">
-                <!-- Sample posts -->
-                <div class="post-card">
-                    <div class="post-header">
-                        <div class="post-avatar">A</div>
-                        <div class="post-info">
-                            <h3>Ananya</h3>
-                            <span class="post-time">2h ago</span>
-                        </div>
-                    </div>
-                    <div class="post-content">
-                        Enjoying the campus festival today!
-                    </div>
-                </div>
+        <!-- ⭐ FIXED SEARCH BAR (TOP ALIGNED, RECTANGULAR) -->
+        <div class="search-container" style="
+            width: 100%;
+            margin-bottom: 40px;
+            display: flex;
+            justify-content: center;
+        ">
+            <div style="position: relative; width: 100%;">
+                <span class="search-icon" style="
+                    position: absolute;
+                    left: 18px;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    font-size: 20px;
+                    color: #4d5d54;
+                ">🔍</span>
 
-                <div class="post-card">
-                    <div class="post-header">
-                        <div class="post-avatar download">↓</div>
-                        <div class="post-info">
-                            <h3>Arjun</h3>
-                            <span class="post-time">2h ago</span>
-                        </div>
-                    </div>
-                    <div class="post-content">
-                        Recent Economics Notes
-                    </div>
-                </div>
-
-                <div class="post-card">
-                    <div class="post-header">
-                        <div class="post-avatar">S</div>
-                        <div class="post-info">
-                            <h3>Sanjay</h3>
-                            <span class="post-time">3h ago</span>
-                        </div>
-                    </div>
-                    <div class="post-content">
-                        A beautiful evening on campus
-                    </div>
-                </div>
-
-                <div class="post-card">
-                    <div class="post-header">
-                        <div class="post-avatar">N</div>
-                        <div class="post-info">
-                            <h3>Neha</h3>
-                            <span class="post-time">3h ago</span>
-                        </div>
-                    </div>
-                    <div class="post-content">
-                        Anyone want to join for a study session this evening?
-                    </div>
-                </div>
+                <input 
+                    type="text" 
+                    class="search-box" 
+                    id="searchBox"
+                    placeholder="Search posts, notes, items, anything…"
+                    style="
+                        width: 100%;
+                        padding: 18px 25px 18px 50px;
+                        border-radius: 12px;
+                        border: 2px solid rgba(0,0,0,0.1);
+                        background: white;
+                        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+                    "
+                />
             </div>
         </div>
 
-        <button class="create-post-btn" id="createPostBtn">+</button>
+        <!-- ⭐ FIXED — JS WILL LOAD POSTS HERE -->
+        <div id="postsContainer"></div>
+
     </div>
+
+    <button class="create-post-btn" id="createPostBtn">+</button>
+</div>
+
 
     <!-- Image Modal -->
     <div class="image-modal" id="imageModal">
@@ -2209,9 +2213,11 @@
         </div>
     </div>
     <div id="postsContainer"></div>
-    <input type="text" class="search-box" id="searchBox" placeholder="Search">
+   
 
-
+<footer>
+        <p>2024 Studenthood. All rights reserved.</p>
+    </footer>
 
     <script>
         // Initialize Supabase
@@ -2936,6 +2942,10 @@ searchBox.addEventListener("input", function () {
             post.style.display = "none";    // hide
         }
     });
+});
+window.addEventListener("load", () => {
+    const imgModal = document.getElementById("imageModal");
+    if (imgModal) imgModal.style.display = "none";
 });
 
     </script>
