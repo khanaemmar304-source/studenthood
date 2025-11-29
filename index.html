@@ -2339,72 +2339,65 @@
 
 
     <script>
-        // ----------------------------
-        // PART 1 — INITIAL SETUP
-        // ----------------------------
+       // ----------------------------
+// PART 1 — INITIAL SETUP (FIXED)
+// ----------------------------
 
-        // Initialize Supabase
-        supabase.auth.onAuthStateChange((event, session) => {
+// Initialize Supabase FIRST
+const SUPABASE_URL = 'https://vehaakunkgxwuzdrlfut.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOi...your key here...';
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// Elements
+const dashboard = document.getElementById('dashboard');
+const userAvatar = document.getElementById('userAvatar');
+const userName = document.getElementById('userName');
+const loginModal = document.getElementById('loginModal');
+const signupModal = document.getElementById('signupModal');
+const loginError = document.getElementById('loginError');
+const signupError = document.getElementById('signupError');
+let currentUser = null;
+
+// Show dashboard
+function showDashboard(user) {
+    document.querySelectorAll('nav, .hero, .features, .about, .contact')
+        .forEach(el => el.style.display = 'none');
+
+    dashboard.classList.add('active');
+
+    const name = user.user_metadata?.full_name || user.email.split('@')[0];
+    userName.textContent = name;
+    userAvatar.textContent = name.charAt(0).toUpperCase();
+
+    loadPosts();
+}
+
+// Show landing
+function showLandingPage() {
+    dashboard.classList.remove('active');
+    document.querySelectorAll('nav, .hero, .features, .about, .contact')
+        .forEach(el => el.style.display = '');
+}
+
+// Auth Listener (RUNS ONLY AFTER supabase is defined)
+supabase.auth.onAuthStateChange((event, session) => {
     if (session && event === "SIGNED_IN") {
+        currentUser = session.user;
         showDashboard(session.user);
+    } else if (event === "SIGNED_OUT") {
+        currentUser = null;
+        showLandingPage();
     }
 });
 
-        const SUPABASE_URL = 'https://vehaakunkgxwuzdrlfut.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOi...your key here...';
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Check session on refresh
+supabase.auth.getSession().then(({ data }) => {
+    if (data.session) {
+        currentUser = data.session.user;
+        showDashboard(currentUser);
+    }
+});
 
-        // Elements
-        const dashboard = document.getElementById('dashboard');
-        const postsContainer = document.getElementById('postsContainer');
-        const userAvatar = document.getElementById('userAvatar');
-        const userName = document.getElementById('userName');
-        const loginModal = document.getElementById('loginModal');
-        const signupModal = document.getElementById('signupModal');
-        const loginError = document.getElementById('loginError');
-        const signupError = document.getElementById('signupError');
-
-        let currentUser = null;
-
-        // Show dashboard
-        function showDashboard(user) {
-            document.querySelectorAll('nav, .hero, .features, .about, .contact')
-                .forEach(el => el.style.display = 'none');
-
-            dashboard.classList.add('active');
-
-            const name = user.user_metadata?.full_name || user.email.split('@')[0];
-            userName.textContent = name;
-            userAvatar.textContent = name.charAt(0).toUpperCase();
-
-            loadPosts();
-        }
-
-        // Show landing
-        function showLandingPage() {
-            dashboard.classList.remove('active');
-            document.querySelectorAll('nav, .hero, .features, .about, .contact')
-                .forEach(el => el.style.display = '');
-        }
-
-        // Auth state listener
-        supabase.auth.onAuthStateChange((event, session) => {
-            if (session && event === "SIGNED_IN") {
-                currentUser = session.user;
-                showDashboard(session.user);
-            } else if (event === "SIGNED_OUT") {
-                currentUser = null;
-                showLandingPage();
-            }
-        });
-
-        // On refresh check session
-        supabase.auth.getSession().then(({ data }) => {
-            if (data.session) {
-                currentUser = data.session.user;
-                showDashboard(currentUser);
-            }
-        });
         // ----------------------------
         // PART 2 — LOGIN / SIGNUP / LOGOUT + POSTS
         // ----------------------------
@@ -2560,33 +2553,7 @@
                 btn.innerHTML = '<span>🔍</span> Continue with Google';
             }
         });
-        document.getElementById("googleLogin").addEventListener("click", async function () {
-            const btn = this;
-            btn.classList.add("loading");
-            btn.textContent = "Connecting to Google...";
-
-            try {
-                const { error } = await supabase.auth.signInWithOAuth({
-                    provider: "google",
-                    options: {
-                        redirectTo: "https://studenthood.netlify.app"
-                    }
-                });
-
-                if (error) {
-                    console.error(error);
-                    alert("Google login failed.");
-                }
-
-            } catch (err) {
-                console.error(err);
-                alert("Unexpected error.");
-            } finally {
-                btn.classList.remove("loading");
-                btn.innerHTML = '<span>🔍</span> Continue with Google';
-            }
-        });
-
+        
 
     </script>
 </body>
