@@ -2339,221 +2339,405 @@
 
 
     <script>
-       // ----------------------------
-// PART 1 — INITIAL SETUP (FIXED)
-// ----------------------------
+        // PART 1 — INITIALIZATION & HELPERS
+        // Paste this first (end of body is fine)
 
-// Initialize Supabase FIRST
-const SUPABASE_URL = 'https://vehaakunkgxwuzdrlfut.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOi...your key here...';
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const SUPABASE_URL = 'https://vehaakunkgxwuzdrlfut.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZlaGFha3Vua2d4d3V6ZHJsZnV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ0MjQ3NTUsImV4cCI6MjA4MDAwMDc1NX0.9ZIY7yMIk_eygIw-Q9YJStc8d9HTp_kswJ2Uuq2JQJo'; // <- REPLACE THIS
 
-// Elements
-const dashboard = document.getElementById('dashboard');
-const userAvatar = document.getElementById('userAvatar');
-const userName = document.getElementById('userName');
-const loginModal = document.getElementById('loginModal');
-const signupModal = document.getElementById('signupModal');
-const loginError = document.getElementById('loginError');
-const signupError = document.getElementById('signupError');
-let currentUser = null;
+        // Create supabase client
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// Show dashboard
-function showDashboard(user) {
-    document.querySelectorAll('nav, .hero, .features, .about, .contact')
-        .forEach(el => el.style.display = 'none');
+        // --- DOM references (grab once) ---
+        const dashboard = document.getElementById('dashboard');
+        const postsContainer = document.getElementById('postsContainer');
+        const userAvatar = document.getElementById('userAvatar');
+        const userName = document.getElementById('userName');
 
-    dashboard.classList.add('active');
+        const loginModal = document.getElementById('loginModal');
+        const signupModal = document.getElementById('signupModal');
 
-    const name = user.user_metadata?.full_name || user.email.split('@')[0];
-    userName.textContent = name;
-    userAvatar.textContent = name.charAt(0).toUpperCase();
+        const loginError = document.getElementById('loginError');
+        const signupError = document.getElementById('signupError');
 
-    loadPosts();
-}
+        const getStartedBtn = document.getElementById('getStartedBtn');
+        const closeLogin = document.getElementById('closeLogin');
+        const closeSignup = document.getElementById('closeSignup');
+        const signupLink = document.getElementById('signupLink');
+        const loginLink = document.getElementById('loginLink');
 
-// Show landing
-function showLandingPage() {
-    dashboard.classList.remove('active');
-    document.querySelectorAll('nav, .hero, .features, .about, .contact')
-        .forEach(el => el.style.display = '');
-}
+        const googleLoginBtn = document.getElementById('googleLogin');
+        const googleSignupBtn = document.getElementById('googleSignup');
 
-// Auth Listener (RUNS ONLY AFTER supabase is defined)
-supabase.auth.onAuthStateChange((event, session) => {
-    if (session && event === "SIGNED_IN") {
-        currentUser = session.user;
-        showDashboard(session.user);
-    } else if (event === "SIGNED_OUT") {
-        currentUser = null;
-        showLandingPage();
-    }
-});
+        const logoutBtn = document.getElementById('logoutBtn');
 
-// Check session on refresh
-supabase.auth.getSession().then(({ data }) => {
-    if (data.session) {
-        currentUser = data.session.user;
-        showDashboard(currentUser);
-    }
-});
+        // Login/signup form inputs (grab safely)
+        const loginForm = document.getElementById('loginForm');
+        const loginEmail = document.getElementById('loginEmail');
+        const loginPassword = document.getElementById('loginPassword');
 
-        // ----------------------------
-        // PART 2 — LOGIN / SIGNUP / LOGOUT + POSTS
-        // ----------------------------
+        const signupForm = document.getElementById('signupForm');
+        const signupName = document.getElementById('signupName');
+        const signupEmail = document.getElementById('signupEmail');
+        const signupPassword = document.getElementById('signupPassword');
+        const signupConfirmPassword = document.getElementById('signupConfirmPassword');
 
-        // Helper: show errors
+        // Utility: show error message in modal
         function showError(element, msg) {
+            if (!element) return console.warn('No element to show error:', msg);
             element.textContent = msg;
-            element.classList.add("show");
-            setTimeout(() => element.classList.remove("show"), 4000);
+            element.classList.add('show');
+            // leave it visible for a short time
+            setTimeout(() => element.classList.remove('show'), 4000);
         }
 
-        // Logout
-        document.getElementById('logoutBtn').addEventListener('click', async () => {
-            const { error } = await supabase.auth.signOut();
-            if (error) alert("Logout error.");
-        });
+        // Utility: open/close modal and lock body scroll
+        function openModal(modal) {
+            if (!modal) return;
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeModal(modal) {
+            if (!modal) return;
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
 
-        // LOGIN FORM
-        document.getElementById("loginForm").addEventListener("submit", async (e) => {
-            e.preventDefault();
+        // Show landing / dashboard helpers
+        function showLandingPage() {
+            dashboard.classList.remove('active');
+            document.querySelectorAll('nav, .hero, .features, .about, .contact').forEach(el => el.style.display = '');
+        }
+        function showDashboard(user) {
+            document.querySelectorAll('nav, .hero, .features, .about, .contact').forEach(el => el.style.display = 'none');
+            dashboard.classList.add('active');
 
-            const email = loginEmail.value;
-            const password = loginPassword.value;
-            const btn = loginForm.querySelector(".login-btn");
+            // user might be null-guarded
+            const displayName = (user?.user_metadata?.full_name) || (user?.email?.split?.('@')?.[0]) || 'User';
+            userName.textContent = displayName;
+            userAvatar.textContent = String(displayName).charAt(0).toUpperCase();
 
-            btn.classList.add("loading");
-            btn.textContent = "Logging in...";
+            loadPosts(); // refresh posts for signed-in user
+        }
 
-            try {
-                const { error } = await supabase.auth.signInWithPassword({ email, password });
-                if (error) throw error;
+        // Keep a reference to current user
+        let currentUser = null;
 
-                loginModal.classList.remove("active");
-                document.body.style.overflow = "auto";
-                loginForm.reset();
-
-            } catch (err) {
-                showError(loginError, err.message);
-            } finally {
-                btn.classList.remove("loading");
-                btn.textContent = "Log In";
+        // Auth state listener (run after client created)
+        supabase.auth.onAuthStateChange((event, session) => {
+            console.log('Auth event:', event);
+            if (session && event === 'SIGNED_IN') {
+                currentUser = session.user;
+                showDashboard(session.user);
+            } else if (event === 'SIGNED_OUT') {
+                currentUser = null;
+                showLandingPage();
             }
         });
 
-        // SIGNUP FORM
-        document.getElementById("signupForm").addEventListener("submit", async (e) => {
-            e.preventDefault();
+        // Check existing session on page load
+        (async function checkSessionOnLoad() {
+            try {
+                const { data } = await supabase.auth.getSession();
+                if (data?.session?.user) {
+                    currentUser = data.session.user;
+                    showDashboard(currentUser);
+                } else {
+                    showLandingPage();
+                }
+            } catch (err) {
+                console.error('getSession error', err);
+            }
+        })();
+// PART 2 — AUTH HANDLERS (LOGIN / SIGNUP / LOGOUT / GOOGLE OAUTH)
 
-            const name = signupName.value;
-            const email = signupEmail.value;
+// LOGOUT
+if (logoutBtn) {
+    logoutBtn.addEventListener('click', async () => {
+        try {
+            const { error } = await supabase.auth.signOut();
+            if (error) throw error;
+            // onAuthStateChange will handle UI
+        } catch (err) {
+            alert('Logout failed: ' + (err.message || err));
+            console.error(err);
+        }
+    });
+}
+
+// LOGIN FORM submit
+if (loginForm) {
+    loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = loginForm.querySelector('.login-btn');
+        try {
+            btn && btn.classList.add('loading');
+            btn && (btn.textContent = 'Logging in...');
+
+            const email = loginEmail.value.trim();
+            const password = loginPassword.value;
+
+            const { error } = await supabase.auth.signInWithPassword({ email, password });
+            if (error) throw error;
+
+            // success: close modal
+            closeModal(loginModal);
+            loginForm.reset();
+        } catch (err) {
+            console.error('Login error', err);
+            showError(loginError, err?.message || 'Login failed');
+        } finally {
+            btn && btn.classList.remove('loading');
+            btn && (btn.textContent = 'Log In');
+        }
+    });
+}
+
+// SIGNUP FORM submit
+if (signupForm) {
+    signupForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = signupForm.querySelector('.login-btn');
+        try {
+            const name = signupName.value.trim();
+            const email = signupEmail.value.trim();
             const password = signupPassword.value;
             const confirm = signupConfirmPassword.value;
 
-            if (password !== confirm) return showError(signupError, "Passwords do not match.");
-
-            const btn = signupForm.querySelector(".login-btn");
-            btn.classList.add("loading");
-            btn.textContent = "Creating account...";
-
-            try {
-                const { error } = await supabase.auth.signUp({
-                    email,
-                    password,
-                    options: { data: { full_name: name } }
-                });
-
-                if (error) throw error;
-
-                alert("Account created! Check your email to verify.");
-                signupModal.classList.remove("active");
-                signupForm.reset();
-
-            } catch (err) {
-                showError(signupError, err.message);
-            } finally {
-                btn.classList.remove("loading");
-                btn.textContent = "Sign Up";
+            if (password !== confirm) {
+                return showError(signupError, 'Passwords do not match.');
             }
+
+            btn && btn.classList.add('loading');
+            btn && (btn.textContent = 'Creating account...');
+
+            const { data, error } = await supabase.auth.signUp({
+                email,
+                password,
+                options: { data: { full_name: name } }
+            });
+
+            if (error) throw error;
+
+            // created — depending on your Supabase settings, the user may need to confirm via email
+            alert('Account created! Check your email to verify (if required).');
+            closeModal(signupModal);
+            signupForm.reset();
+        } catch (err) {
+            console.error('Signup error', err);
+            showError(signupError, err?.message || 'Signup failed');
+        } finally {
+            btn && btn.classList.remove('loading');
+            btn && (btn.textContent = 'Sign Up');
+        }
+    });
+}
+
+// OPEN/CLOSE modal controls (safe guards)
+if (getStartedBtn) {
+    getStartedBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        openModal(loginModal);
+    });
+}
+if (closeLogin) closeLogin.addEventListener('click', () => closeModal(loginModal));
+if (closeSignup) closeSignup.addEventListener('click', () => closeModal(signupModal));
+if (signupLink) signupLink.addEventListener('click', (e) => { e.preventDefault(); closeModal(loginModal); openModal(signupModal); });
+if (loginLink) loginLink.addEventListener('click', (e) => { e.preventDefault(); closeModal(signupModal); openModal(loginModal); });
+
+// GOOGLE OAUTH (single clean handler)
+// Note: `redirectTo` must be an allowed redirect in your Supabase settings. For local testing you can use window.location.origin.
+async function signInWithGoogle() {
+    try {
+        const redirectTo = window.location.origin; // change if you need a specific route
+        const { data, error } = await supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: { redirectTo }
         });
 
-        // OPEN/CLOSE login/signup modals
-        getStartedBtn.onclick = () => { loginModal.classList.add("active"); };
-        closeLogin.onclick = () => loginModal.classList.remove("active");
-        closeSignup.onclick = () => signupModal.classList.remove("active");
-        signupLink.onclick = (e) => { e.preventDefault(); loginModal.classList.remove("active"); signupModal.classList.add("active"); };
-        loginLink.onclick = (e) => { e.preventDefault(); signupModal.classList.remove("active"); loginModal.classList.add("active"); };
+        // typically Supabase will redirect the page to Google — data mostly used for popup flows
+        if (error) throw error;
+        console.log('Google signIn initiated', data);
+    } catch (err) {
+        console.error('Google signIn error', err);
+        showError(loginError, err?.message || 'Google login failed');
+    }
+}
 
-        // ----------------------------
-        // POSTS
-        // ----------------------------
+if (googleLoginBtn) googleLoginBtn.addEventListener('click', (e) => { e.preventDefault(); signInWithGoogle(); });
+if (googleSignupBtn) googleSignupBtn.addEventListener('click', (e) => { e.preventDefault(); signInWithGoogle(); });
+// PART 3 — POSTS / SEARCH / CREATE POST UI
 
-        async function loadPosts() {
-            const { data, error } = await supabase
-                .from("posts")
-                .select("*")
-                .order("created_at", { ascending: false });
+const createPostBtn = document.getElementById('createPostBtn');
+const createPostModal = document.getElementById('createPostModal');
+const closeCreatePost = document.getElementById('closeCreatePost');
+const createPostForm = document.getElementById('createPostForm');
+const postContentInput = document.getElementById('postContent');
+const imageUploadInput = document.getElementById('imageUpload');
+const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+const imagePreview = document.getElementById('imagePreview');
+const removeImageBtn = document.getElementById('removeImageBtn');
+const cancelPostBtn = document.getElementById('cancelPost');
+const searchBox = document.getElementById('searchBox');
 
-            postsContainer.innerHTML = "";
+// Basic UI wiring
+if (createPostBtn) createPostBtn.addEventListener('click', () => openModal(createPostModal));
+if (closeCreatePost) closeCreatePost.addEventListener('click', () => closeModal(createPostModal));
+if (cancelPostBtn) cancelPostBtn.addEventListener('click', () => closeModal(createPostModal));
 
-            if (data) {
-                data.forEach(post => addPostToUI(post));
-            }
+// image preview
+if (imageUploadInput) {
+    imageUploadInput.addEventListener('change', (e) => {
+        const file = e.target.files?.[0];
+        if (!file) {
+            imagePreviewContainer?.classList.remove('active');
+            return;
         }
+        const url = URL.createObjectURL(file);
+        if (imagePreview) imagePreview.src = url;
+        imagePreviewContainer?.classList.add('active');
+    });
+}
+if (removeImageBtn) removeImageBtn.addEventListener('click', () => {
+    imageUploadInput.value = '';
+    imagePreview.src = '';
+    imagePreviewContainer?.classList.remove('active');
+});
 
-        function addPostToUI(post) {
-            const card = document.createElement("div");
-            card.className = "post-card";
+// Load posts from Supabase (assumes 'posts' table with content, author_name, image_url, created_at)
+async function loadPosts() {
+    try {
+        const { data, error } = await supabase
+            .from('posts')
+            .select('*')
+            .order('created_at', { ascending: false })
+            .limit(100);
 
-            const name = post.author_name;
-            const initial = name.charAt(0).toUpperCase();
-            const content = post.content;
+        if (error) throw error;
+        renderPosts(data || []);
+    } catch (err) {
+        console.error('loadPosts error', err);
+    }
+}
 
-            card.innerHTML = `
+function renderPosts(posts = []) {
+    if (!postsContainer) return;
+    postsContainer.innerHTML = '';
+    if (!posts.length) {
+        postsContainer.innerHTML = '<div style="color:#4d5d54">No posts yet</div>';
+        return;
+    }
+    posts.forEach(p => addPostToUI(p));
+}
+
+function addPostToUI(post) {
+    const card = document.createElement('div');
+    card.className = 'post-card';
+    const name = post.author_name || (post.user_email?.split?.('@')?.[0]) || 'Anonymous';
+    const initial = String(name).charAt(0).toUpperCase();
+    const content = post.content || '';
+
+    card.innerHTML = `
         <div class="post-header">
             <div class="post-avatar">${initial}</div>
             <div class="post-info">
-                <h3>${name}</h3>
+                <h3>${escapeHtml(name)}</h3>
+                <div class="post-time">${formatAgo(post.created_at)}</div>
             </div>
         </div>
-        <div class="post-content">${content}</div>
-        ${post.image_url ? `<img class="post-image" src="${post.image_url}" />` : ""}
+        <div class="post-content">${escapeHtml(content)}</div>
+        ${post.image_url ? `<img class="post-image" src="${post.image_url}" />` : ''}
     `;
+    postsContainer.appendChild(card);
+}
 
-            postsContainer.appendChild(card);
+// small helper: escape HTML to avoid injection in demo
+function escapeHtml(str = '') {
+    return String(str)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+}
+
+// format created_at like "2h ago" (simple)
+function formatAgo(isoDate) {
+    if (!isoDate) return '';
+    const d = new Date(isoDate);
+    const diff = Math.floor((Date.now() - d.getTime()) / 1000);
+    if (diff < 60) return `${diff}s ago`;
+    if (diff < 3600) return `${Math.floor(diff/60)}m ago`;
+    if (diff < 86400) return `${Math.floor(diff/3600)}h ago`;
+    return d.toLocaleDateString();
+}
+
+// create post (simple insert, image upload not implemented to storage here)
+if (createPostForm) {
+    createPostForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!currentUser) return alert('You must be signed in to post.');
+
+        const content = postContentInput.value.trim();
+        if (!content) return alert('Please enter some text.');
+
+        try {
+            const author_name = currentUser.user_metadata?.full_name || currentUser.email.split('@')[0];
+            // If you want image uploads to bucket: upload image file then set image_url to public URL.
+            // For now we only insert text posts.
+            const { data, error } = await supabase.from('posts').insert([{
+                content,
+                author_name,
+                user_id: currentUser.id,
+                created_at: new Date().toISOString()
+            }]);
+
+            if (error) throw error;
+            // refresh posts and close modal
+            await loadPosts();
+            createPostForm.reset();
+            imageUploadInput.value = '';
+            imagePreview.src = '';
+            imagePreviewContainer?.classList.remove('active');
+            closeModal(createPostModal);
+        } catch (err) {
+            console.error('create post error', err);
+            alert('Failed to create post: ' + (err.message || err));
         }
-        // ----------------------------
-        // PART 3 — GOOGLE LOGIN
-        // ----------------------------
+    });
+}
 
-        document.getElementById("googleLogin").addEventListener("click", async function () {
-            const btn = this;
-            btn.classList.add("loading");
-            btn.textContent = "Connecting to Google...";
+// Simple search by content or author (client-side)
+if (searchBox) {
+    searchBox.addEventListener('input', (e) => {
+        const q = e.target.value.trim().toLowerCase();
+        // If empty -> reload all posts
+        if (!q) return loadPosts();
+        // Fetch filtered posts from supabase (server-side filtering)
+        searchPosts(q);
+    });
+}
+async function searchPosts(query) {
+    try {
+        // This uses ilike for case-insensitive contains
+        const { data, error } = await supabase
+            .from('posts')
+            .select('*')
+            .or(`content.ilike.%${query}%,author_name.ilike.%${query}%`)
+            .order('created_at', { ascending: false })
+            .limit(200);
 
-            try {
-                const { error } = await supabase.auth.signInWithOAuth({
-                    provider: "google",
-                    options: {
-                        redirectTo: "https://studenthood.netlify.app"
-                    }
-                });
+        if (error) throw error;
+        renderPosts(data || []);
+    } catch (err) {
+        console.error('searchPosts error', err);
+    }
+}
 
-                if (error) {
-                    console.error(error);
-                    showError(loginError, "Google login failed.");
-                }
+// initial load on script attach
+loadPosts();
 
-            } catch (err) {
-                console.error(err);
-                showError(loginError, "Unexpected error. Try again.");
-            } finally {
-                btn.classList.remove("loading");
-                btn.innerHTML = '<span>🔍</span> Continue with Google';
-            }
-        });
-        
+
 
     </script>
 </body>
