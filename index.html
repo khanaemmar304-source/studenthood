@@ -2929,13 +2929,21 @@
             btn.classList.add('loading');
             btn.textContent = 'Connecting to Google';
 
-            try {
-                const { data, error } = awaitsupabase.auth.signInWithOAuth({
-                    provider: 'google',
-                    options: {
-                        redirectTo: 'https://studenthood.netlify.app'
-                    }
-                })
+         try {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+            redirectTo: 'https://studenthood.netlify.app'
+        }
+    });
+
+    if (error) {
+        console.error(error);
+    }
+} catch (err) {
+    console.error(err);
+}
+
 
 
                 if (error) throw error;
