@@ -2149,9 +2149,7 @@
                         <span>OR</span>
                     </div>
 
-                    <button type="button" class="social-login-btn" id="googleLogin" style="width: 100%;">
-                        <span>🔍</span> Continue with Google
-                    </button>
+                  
 
                     <div class="signup-link">
                         Don't have an account? <a href="#" id="signupLink">Sign Up</a>
@@ -2201,9 +2199,7 @@
                         <span>OR</span>
                     </div>
 
-                    <button type="button" class="social-login-btn" id="googleSignup" style="width: 100%;">
-                        <span>🔍</span> Sign up with Google
-                    </button>
+                   
 
                     <div class="signup-link">
                         Already have an account? <a href="#" id="loginLink">Log In</a>
@@ -2834,36 +2830,7 @@
             }
         });
 
-        // Google signup button
-        document.getElementById('googleSignup').addEventListener('click', async function() {
-            const btn = this;
-            btn.classList.add('loading');
-            btn.textContent = 'Connecting to Google';
-            
-            try {
-                const { data, error } = await supabase.auth.signInWithOAuth({
-                    provider: 'google',
-                    options: {
-                        redirectTo: window.location.origin
-                    }
-                });
-
-                if (error) throw error;
-                
-            } catch (error) {
-                console.error('Google signup error:', error);
-                
-                // Check if it's the provider not enabled error
-                if (error.message && error.message.includes('not enabled')) {
-                    showError(signupError, 'Google Sign-Up is not yet configured. Please use email/password signup for now.');
-                } else {
-                    showError(signupError, 'Google signup failed. Please try again.');
-                }
-            } finally {
-                btn.classList.remove('loading');
-                btn.innerHTML = '<span>🔍</span> Sign up with Google';
-            }
-        });
+       
 
         // Smooth scrolling for navigation links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
