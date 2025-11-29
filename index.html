@@ -2266,9 +2266,10 @@
                         <span>OR</span>
                     </div>
 
-                    <button type="button" class="social-login-btn" id="googleLogin" style="width: 100%;">
+                    <button id="googleLogin" class="google-btn">
                         <span>🔍</span> Continue with Google
                     </button>
+
 
                     <div class="signup-link">
                         Don't have an account? <a href="#" id="signupLink">Sign Up</a>
@@ -2339,178 +2340,184 @@
 
     <script>
         // ----------------------------
-// PART 1 — INITIAL SETUP
-// ----------------------------
+        // PART 1 — INITIAL SETUP
+        // ----------------------------
 
-// Initialize Supabase
-const SUPABASE_URL = 'https://vehaakunkgxwuzdrlfut.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOi...your key here...';
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-// Elements
-const dashboard = document.getElementById('dashboard');
-const postsContainer = document.getElementById('postsContainer');
-const userAvatar = document.getElementById('userAvatar');
-const userName = document.getElementById('userName');
-const loginModal = document.getElementById('loginModal');
-const signupModal = document.getElementById('signupModal');
-const loginError = document.getElementById('loginError');
-const signupError = document.getElementById('signupError');
-
-let currentUser = null;
-
-// Show dashboard
-function showDashboard(user) {
-    document.querySelectorAll('nav, .hero, .features, .about, .contact')
-        .forEach(el => el.style.display = 'none');
-
-    dashboard.classList.add('active');
-
-    const name = user.user_metadata?.full_name || user.email.split('@')[0];
-    userName.textContent = name;
-    userAvatar.textContent = name.charAt(0).toUpperCase();
-
-    loadPosts();
-}
-
-// Show landing
-function showLandingPage() {
-    dashboard.classList.remove('active');
-    document.querySelectorAll('nav, .hero, .features, .about, .contact')
-        .forEach(el => el.style.display = '');
-}
-
-// Auth state listener
-supabase.auth.onAuthStateChange((event, session) => {
+        // Initialize Supabase
+        supabase.auth.onAuthStateChange((event, session) => {
     if (session && event === "SIGNED_IN") {
-        currentUser = session.user;
         showDashboard(session.user);
-    } else if (event === "SIGNED_OUT") {
-        currentUser = null;
-        showLandingPage();
     }
 });
 
-// On refresh check session
-supabase.auth.getSession().then(({ data }) => {
-    if (data.session) {
-        currentUser = data.session.user;
-        showDashboard(currentUser);
-    }
-});
-// ----------------------------
-// PART 2 — LOGIN / SIGNUP / LOGOUT + POSTS
-// ----------------------------
+        const SUPABASE_URL = 'https://vehaakunkgxwuzdrlfut.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOi...your key here...';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// Helper: show errors
-function showError(element, msg) {
-    element.textContent = msg;
-    element.classList.add("show");
-    setTimeout(() => element.classList.remove("show"), 4000);
-}
+        // Elements
+        const dashboard = document.getElementById('dashboard');
+        const postsContainer = document.getElementById('postsContainer');
+        const userAvatar = document.getElementById('userAvatar');
+        const userName = document.getElementById('userName');
+        const loginModal = document.getElementById('loginModal');
+        const signupModal = document.getElementById('signupModal');
+        const loginError = document.getElementById('loginError');
+        const signupError = document.getElementById('signupError');
 
-// Logout
-document.getElementById('logoutBtn').addEventListener('click', async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) alert("Logout error.");
-});
+        let currentUser = null;
 
-// LOGIN FORM
-document.getElementById("loginForm").addEventListener("submit", async (e) => {
-    e.preventDefault();
+        // Show dashboard
+        function showDashboard(user) {
+            document.querySelectorAll('nav, .hero, .features, .about, .contact')
+                .forEach(el => el.style.display = 'none');
 
-    const email = loginEmail.value;
-    const password = loginPassword.value;
-    const btn = loginForm.querySelector(".login-btn");
+            dashboard.classList.add('active');
 
-    btn.classList.add("loading");
-    btn.textContent = "Logging in...";
+            const name = user.user_metadata?.full_name || user.email.split('@')[0];
+            userName.textContent = name;
+            userAvatar.textContent = name.charAt(0).toUpperCase();
 
-    try {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
+            loadPosts();
+        }
 
-        loginModal.classList.remove("active");
-        document.body.style.overflow = "auto";
-        loginForm.reset();
+        // Show landing
+        function showLandingPage() {
+            dashboard.classList.remove('active');
+            document.querySelectorAll('nav, .hero, .features, .about, .contact')
+                .forEach(el => el.style.display = '');
+        }
 
-    } catch (err) {
-        showError(loginError, err.message);
-    } finally {
-        btn.classList.remove("loading");
-        btn.textContent = "Log In";
-    }
-});
-
-// SIGNUP FORM
-document.getElementById("signupForm").addEventListener("submit", async (e) => {
-    e.preventDefault();
-
-    const name = signupName.value;
-    const email = signupEmail.value;
-    const password = signupPassword.value;
-    const confirm = signupConfirmPassword.value;
-
-    if (password !== confirm) return showError(signupError, "Passwords do not match.");
-
-    const btn = signupForm.querySelector(".login-btn");
-    btn.classList.add("loading");
-    btn.textContent = "Creating account...";
-
-    try {
-        const { error } = await supabase.auth.signUp({
-            email,
-            password,
-            options: { data: { full_name: name } }
+        // Auth state listener
+        supabase.auth.onAuthStateChange((event, session) => {
+            if (session && event === "SIGNED_IN") {
+                currentUser = session.user;
+                showDashboard(session.user);
+            } else if (event === "SIGNED_OUT") {
+                currentUser = null;
+                showLandingPage();
+            }
         });
 
-        if (error) throw error;
+        // On refresh check session
+        supabase.auth.getSession().then(({ data }) => {
+            if (data.session) {
+                currentUser = data.session.user;
+                showDashboard(currentUser);
+            }
+        });
+        // ----------------------------
+        // PART 2 — LOGIN / SIGNUP / LOGOUT + POSTS
+        // ----------------------------
 
-        alert("Account created! Check your email to verify.");
-        signupModal.classList.remove("active");
-        signupForm.reset();
+        // Helper: show errors
+        function showError(element, msg) {
+            element.textContent = msg;
+            element.classList.add("show");
+            setTimeout(() => element.classList.remove("show"), 4000);
+        }
 
-    } catch (err) {
-        showError(signupError, err.message);
-    } finally {
-        btn.classList.remove("loading");
-        btn.textContent = "Sign Up";
-    }
-});
+        // Logout
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            const { error } = await supabase.auth.signOut();
+            if (error) alert("Logout error.");
+        });
 
-// OPEN/CLOSE login/signup modals
-getStartedBtn.onclick = () => { loginModal.classList.add("active"); };
-closeLogin.onclick = () => loginModal.classList.remove("active");
-closeSignup.onclick = () => signupModal.classList.remove("active");
-signupLink.onclick = (e) => { e.preventDefault(); loginModal.classList.remove("active"); signupModal.classList.add("active"); };
-loginLink.onclick = (e) => { e.preventDefault(); signupModal.classList.remove("active"); loginModal.classList.add("active"); };
+        // LOGIN FORM
+        document.getElementById("loginForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
 
-// ----------------------------
-// POSTS
-// ----------------------------
+            const email = loginEmail.value;
+            const password = loginPassword.value;
+            const btn = loginForm.querySelector(".login-btn");
 
-async function loadPosts() {
-    const { data, error } = await supabase
-        .from("posts")
-        .select("*")
-        .order("created_at", { ascending: false });
+            btn.classList.add("loading");
+            btn.textContent = "Logging in...";
 
-    postsContainer.innerHTML = "";
+            try {
+                const { error } = await supabase.auth.signInWithPassword({ email, password });
+                if (error) throw error;
 
-    if (data) {
-        data.forEach(post => addPostToUI(post));
-    }
-}
+                loginModal.classList.remove("active");
+                document.body.style.overflow = "auto";
+                loginForm.reset();
 
-function addPostToUI(post) {
-    const card = document.createElement("div");
-    card.className = "post-card";
+            } catch (err) {
+                showError(loginError, err.message);
+            } finally {
+                btn.classList.remove("loading");
+                btn.textContent = "Log In";
+            }
+        });
 
-    const name = post.author_name;
-    const initial = name.charAt(0).toUpperCase();
-    const content = post.content;
+        // SIGNUP FORM
+        document.getElementById("signupForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
 
-    card.innerHTML = `
+            const name = signupName.value;
+            const email = signupEmail.value;
+            const password = signupPassword.value;
+            const confirm = signupConfirmPassword.value;
+
+            if (password !== confirm) return showError(signupError, "Passwords do not match.");
+
+            const btn = signupForm.querySelector(".login-btn");
+            btn.classList.add("loading");
+            btn.textContent = "Creating account...";
+
+            try {
+                const { error } = await supabase.auth.signUp({
+                    email,
+                    password,
+                    options: { data: { full_name: name } }
+                });
+
+                if (error) throw error;
+
+                alert("Account created! Check your email to verify.");
+                signupModal.classList.remove("active");
+                signupForm.reset();
+
+            } catch (err) {
+                showError(signupError, err.message);
+            } finally {
+                btn.classList.remove("loading");
+                btn.textContent = "Sign Up";
+            }
+        });
+
+        // OPEN/CLOSE login/signup modals
+        getStartedBtn.onclick = () => { loginModal.classList.add("active"); };
+        closeLogin.onclick = () => loginModal.classList.remove("active");
+        closeSignup.onclick = () => signupModal.classList.remove("active");
+        signupLink.onclick = (e) => { e.preventDefault(); loginModal.classList.remove("active"); signupModal.classList.add("active"); };
+        loginLink.onclick = (e) => { e.preventDefault(); signupModal.classList.remove("active"); loginModal.classList.add("active"); };
+
+        // ----------------------------
+        // POSTS
+        // ----------------------------
+
+        async function loadPosts() {
+            const { data, error } = await supabase
+                .from("posts")
+                .select("*")
+                .order("created_at", { ascending: false });
+
+            postsContainer.innerHTML = "";
+
+            if (data) {
+                data.forEach(post => addPostToUI(post));
+            }
+        }
+
+        function addPostToUI(post) {
+            const card = document.createElement("div");
+            card.className = "post-card";
+
+            const name = post.author_name;
+            const initial = name.charAt(0).toUpperCase();
+            const content = post.content;
+
+            card.innerHTML = `
         <div class="post-header">
             <div class="post-avatar">${initial}</div>
             <div class="post-info">
@@ -2521,38 +2528,65 @@ function addPostToUI(post) {
         ${post.image_url ? `<img class="post-image" src="${post.image_url}" />` : ""}
     `;
 
-    postsContainer.appendChild(card);
-}
-// ----------------------------
-// PART 3 — GOOGLE LOGIN
-// ----------------------------
+            postsContainer.appendChild(card);
+        }
+        // ----------------------------
+        // PART 3 — GOOGLE LOGIN
+        // ----------------------------
 
-document.getElementById("googleLogin").addEventListener("click", async function () {
-    const btn = this;
-    btn.classList.add("loading");
-    btn.textContent = "Connecting to Google...";
+        document.getElementById("googleLogin").addEventListener("click", async function () {
+            const btn = this;
+            btn.classList.add("loading");
+            btn.textContent = "Connecting to Google...";
 
-    try {
-        const { error } = await supabase.auth.signInWithOAuth({
-            provider: "google",
-            options: {
-                redirectTo: "https://studenthood.netlify.app"
+            try {
+                const { error } = await supabase.auth.signInWithOAuth({
+                    provider: "google",
+                    options: {
+                        redirectTo: "https://studenthood.netlify.app"
+                    }
+                });
+
+                if (error) {
+                    console.error(error);
+                    showError(loginError, "Google login failed.");
+                }
+
+            } catch (err) {
+                console.error(err);
+                showError(loginError, "Unexpected error. Try again.");
+            } finally {
+                btn.classList.remove("loading");
+                btn.innerHTML = '<span>🔍</span> Continue with Google';
+            }
+        });
+        document.getElementById("googleLogin").addEventListener("click", async function () {
+            const btn = this;
+            btn.classList.add("loading");
+            btn.textContent = "Connecting to Google...";
+
+            try {
+                const { error } = await supabase.auth.signInWithOAuth({
+                    provider: "google",
+                    options: {
+                        redirectTo: "https://studenthood.netlify.app"
+                    }
+                });
+
+                if (error) {
+                    console.error(error);
+                    alert("Google login failed.");
+                }
+
+            } catch (err) {
+                console.error(err);
+                alert("Unexpected error.");
+            } finally {
+                btn.classList.remove("loading");
+                btn.innerHTML = '<span>🔍</span> Continue with Google';
             }
         });
 
-        if (error) {
-            console.error(error);
-            showError(loginError, "Google login failed.");
-        }
-
-    } catch (err) {
-        console.error(err);
-        showError(loginError, "Unexpected error. Try again.");
-    } finally {
-        btn.classList.remove("loading");
-        btn.innerHTML = '<span>🔍</span> Continue with Google';
-    }
-});
 
     </script>
 </body>
