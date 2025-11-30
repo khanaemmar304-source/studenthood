@@ -72,41 +72,22 @@
     Tic-Tac-Toe Multiplayer
   </div>
 
-  <!-- Random Chat -->
-  <div class="card" onclick="openRandomChat()">
+  <!-- Global Chat -->
+  <div class="card" onclick="openChat()">
     <span class="emoji">💬</span>
-    Random Chat
+    Global Chat
   </div>
 
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <script>
-/* ==============================
-    SUPABASE CONFIG
-============================== */
-const SUPABASE_URL = "https://cxycyvactcsppkltvzyf.supabase.co";
-const SUPABASE_ANON_KEY =
-"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN4eWN5dmFjdGNzcHBrbHR2enlmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ0NDY1MTUsImV4cCI6MjA4MDAyMjUxNX0.6H6Lr35L_HDWwplqiNxlHMyrr69fPK2f6AikPhcvMRg";
-
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-const myId = crypto.randomUUID().slice(0,8);
-
-/* ==============================
-    GAME OPEN LOGIC
-============================== */
 function openGame(game) {
   const room = Math.random().toString(36).substring(2, 8);
   window.location.href = `${game}?room=${room}`;
 }
 
-/* ==============================
-    RANDOM CHAT MATCHMAKING
-============================== */
-function openRandomChat() {
-  window.location.href = "chatroulette.html?id=" + myId;
+function openChat() {
+  window.location.href = "globalchat.html";
 }
 </script>
 
