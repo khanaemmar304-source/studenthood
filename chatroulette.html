@@ -55,30 +55,37 @@ const myId = params.get("id");
 let queue = {};
 let searching = true;
 
+/* IMPORTANT: self:true so we receive our own join event */
 const channel = supabase.channel("chatroulette", {
-  config:{ broadcast:{ self:false } }
+  config:{ broadcast:{ self:true } }
 });
 
+/* RECEIVE JOIN */
 channel.on("broadcast", { event:"join" }, ({payload})=>{
   queue[payload.id] = payload.time;
   tryMatch();
 });
 
+/* RECEIVE LEAVE */
 channel.on("broadcast", { event:"leave" }, ({payload})=>{
   delete queue[payload.id];
 });
 
+/* RECEIVE MATCH */
 channel.on("broadcast", { event:"match" }, ({payload})=>{
   if (payload.ids.includes(myId)) {
     window.location.href = "https://tlk.io/" + payload.room;
   }
 });
 
-channel.subscribe(()=>{
-  joinQueue();
+/* Subscribe fully BEFORE sending join */
+channel.subscribe(async (status) => {
+  if (status === "SUBSCRIBED") {
+    joinQueue();
+  }
 });
 
-/* join the queue */
+/* Join the queue */
 function joinQueue(){
   channel.send({
     type:"broadcast",
@@ -87,20 +94,25 @@ function joinQueue(){
   });
 }
 
-/* leave queue */
+/* Leave the queue */
 function leaveQueue(){
   searching = false;
-  channel.send({ type:"broadcast", event:"leave", payload:{ id:myId } });
+  channel.send({
+    type:"broadcast",
+    event:"leave",
+    payload:{ id:myId }
+  });
   window.location.href = "playground.html";
 }
 
-/* try to match 2 people */
+/* Try matching */
 function tryMatch(){
   if (!searching) return;
   const ids = Object.keys(queue);
+
   if (ids.length >= 2) {
     const pair = ids.slice(0, 2);
-    const room = "studenthood-random-" + Math.random().toString(36).slice(2,8);
+    const room = "studenthood-chat-" + Math.random().toString(36).slice(2,8);
 
     channel.send({
       type:"broadcast",
