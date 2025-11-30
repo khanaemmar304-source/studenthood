@@ -1,139 +1,153 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>UNO Multiplayer – Studenthood</title>
+<meta charset="UTF-8">
+<title>UNO Multiplayer – Studenthood</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <style>
-    body {
-      margin: 0;
-      background: #f5e6d3;
-      font-family: "Segoe UI", sans-serif;
-      color: #2d5446;
-    }
+<style>
+  body {
+    margin: 0;
+    font-family: "Poppins", sans-serif;
+    background: linear-gradient(135deg, #8B9E9D 0%, #D4C5B9 100%);
+    padding: 30px;
+    color: #2D2424;
+  }
 
-    #topBar {
-      background: #ffffffcc;
-      backdrop-filter: blur(10px);
-      padding: 15px 30px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.15);
-    }
+  h1 {
+    text-align: center;
+    font-size: 36px;
+    color: #fff;
+    margin-bottom: 15px;
+    text-shadow: 0 4px 12px rgba(0,0,0,0.25);
+  }
 
-    #topBar h1 {
-      margin: 0;
-      font-size: 28px;
-      color: #2d5446;
-      font-weight: 700;
-    }
+  /* LOBBY CARD */
+  #lobby {
+    max-width: 700px;
+    margin: 0 auto;
+    background: rgba(255,255,255,0.25);
+    backdrop-filter: blur(12px);
+    padding: 25px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+    text-align: center;
+  }
 
-    #roomBox {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-    }
+  #lobby h2 {
+    margin: 0;
+    margin-bottom: 10px;
+    font-size: 26px;
+  }
 
-    #roomId {
-      background: #e8dcc8;
-      padding: 6px 14px;
-      border-radius: 8px;
-      font-weight: 600;
-    }
+  .players-list {
+    background: rgba(255,255,255,0.35);
+    border-radius: 14px;
+    padding: 10px;
+    margin: 12px 0;
+  }
 
-    #copyBtn {
-      background: #4a6556;
-      padding: 6px 12px;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: 600;
-    }
+  .player-item {
+    padding: 6px 0;
+    font-size: 18px;
+    font-weight: 600;
+  }
 
-    #gameArea {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      margin-top: 30px;
-    }
+  button {
+    background: #4a6556;
+    color: white;
+    border: none;
+    padding: 12px 22px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 18px;
+    margin-top: 12px;
+    font-weight: bold;
+    transition: 0.2s;
+  }
 
-    /* Center card pile */
-    #pile {
-      width: 160px;
-      height: 240px;
-      margin-top: 20px;
-      position: relative;
-    }
+  button:hover {
+    transform: scale(1.05);
+  }
 
-    #pile img {
-      width: 100%;
-      border-radius: 12px;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.2);
-    }
+  /* GAME AREA */
+  #gameArea {
+    display: none;
+    margin-top: 25px;
+    text-align: center;
+  }
 
-    /* Player hand */
-    #hand {
-      margin-top: 40px;
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      justify-content: center;
-      background: rgba(255,255,255,0.5);
-      padding: 20px;
-      border-radius: 20px;
-      width: 90%;
-      max-width: 900px;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.1);
-    }
+  #topCard {
+    width: 160px;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+  }
 
-    .card {
-      width: 100px;
-      cursor: pointer;
-      transition: 0.2s;
-    }
+  #hand {
+    margin-top: 35px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    justify-content: center;
+  }
 
-    .card:hover {
-      transform: translateY(-10px) scale(1.05);
-    }
+  .card {
+    width: 110px;
+    cursor: pointer;
+    border-radius: 12px;
+    transition: 0.2s;
+    box-shadow: 0 5px 18px rgba(0,0,0,0.2);
+  }
 
-    #turnIndicator {
-      margin-top: 20px;
-      font-size: 22px;
-      background: #4a6556;
-      color: white;
-      padding: 10px 24px;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    }
-  </style>
+  .card:hover {
+    transform: translateY(-8px) scale(1.07);
+  }
 
+  #turnBox {
+    margin-top: 20px;
+    background: rgba(0,0,0,0.25);
+    padding: 12px 18px;
+    display: inline-block;
+    border-radius: 12px;
+    font-size: 20px;
+    color: white;
+  }
+
+</style>
 </head>
 <body>
 
-  <div id="topBar">
-    <h1>UNO — Studenthood Game</h1>
-    
-    <div id="roomBox">
-      <span id="roomId">Room: ---</span>
-      <button id="copyBtn">Copy Link</button>
-    </div>
+<h1>🃏 UNO Multiplayer</h1>
+
+<div id="lobby">
+  <h2>Lobby</h2>
+
+  <p><b>Room:</b> <span id="roomId"></span></p>
+
+  <div class="players-list" id="playersList">
+    <!-- players appear here -->
   </div>
 
-  <div id="gameArea">
-    <h2 id="turnIndicator">Waiting for players…</h2>
+  <p id="lobbyStatus">Waiting for players...</p>
 
-    <div id="pile">
-      <img id="pileCard" src="img/back.png">
-    </div>
+  <button id="readyBtn" style="display:none;">Ready</button>
+  <button id="startBtn" style="display:none;">Start Game</button>
+</div>
 
-    <div id="hand"></div>
-  </div>
+<div id="gameArea">
+  <div id="turnBox">Waiting...</div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="uno.js"></script>
+  <h2 style="color:white;margin-top:20px;">Top Card</h2>
+  <img id="topCard" src="img/back.png">
+
+  <h2 style="color:white;margin-top:25px;">Your Hand</h2>
+  <div id="hand"></div>
+
+  <button onclick="drawCard()" style="margin-top:30px;">Draw Card</button>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="uno.js"></script>
 
 </body>
 </html>
