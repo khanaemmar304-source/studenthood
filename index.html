@@ -1811,7 +1811,11 @@ footer {
 </head>
 <body>
     <nav>
-        <div class="logo">STUDENTHOOD</div>
+       <div class="logo" style="display:flex; align-items:center; gap:10px;">
+    <img src="123.png" alt="Logo" style="height:40px;">
+    <span>STUDENTHOOD</span>
+</div>
+
         <ul class="nav-links">
             <li><a href="#home">Home</a></li>
             <li><a href="#features">Features</a></li>
@@ -2025,15 +2029,23 @@ footer {
     <!-- Dashboard -->
 <div class="dashboard" id="dashboard">
     <header class="dashboard-header">
-        <div class="dashboard-logo">STUDENTHOOD</div>
+       <div class="dashboard-logo" style="display:flex; align-items:center; gap:10px;">
+    <img src="123.png" alt="Logo" style="height:35px;">
+    <span>STUDENTHOOD</span>
+</div>
 
-        <div class="dashboard-nav">
-            <div class="user-info">
-                <div class="user-avatar" id="userAvatar">U</div>
-                <span id="userName" style="color: #2d5446; font-weight: 600;"></span>
-            </div>
-            <button class="logout-btn" id="logoutBtn">Log Out</button>
-        </div>
+
+       <div class="dashboard-nav">
+    <button onclick="openPlayground()" class="logout-btn" style="background:#6b9bd1;">🎮 Playground</button>
+
+    <div class="user-info">
+        <div class="user-avatar" id="userAvatar">U</div>
+        <span id="userName" style="color: #2d5446; font-weight: 600;"></span>
+    </div>
+
+    <button class="logout-btn" id="logoutBtn">Log Out</button>
+</div>
+
     </header>
 
     <div class="dashboard-container">
@@ -2213,6 +2225,7 @@ footer {
         </div>
     </div>
     <div id="postsContainer"></div>
+    
    
 
 <footer>
@@ -2947,6 +2960,13 @@ window.addEventListener("load", () => {
     const imgModal = document.getElementById("imageModal");
     if (imgModal) imgModal.style.display = "none";
 });
+function openPlayground() {
+    window.open("playground.html", "_blank");
+}
+
+
+
+
 
     </script>
 </body>
