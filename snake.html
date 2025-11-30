@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Slither Multiplayer</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: #8B9E9D;
+      color: #2D2424;
+      font-family: 'Arial', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      min-height: 100vh;
+    }
+
+    #gameContainer {
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+      max-width: 1400px;
+      width: 100%;
+    }
+
+    #leftPanel {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    #ui {
+      background: #D4C5B9;
+      padding: 15px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-width: 250px;
+    }
+
+    #ui .row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    #roomId {
+      font-weight: bold;
+      color: #D2A6A0;
+      background: rgba(210, 166, 160, 0.2);
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+
+    #copyRoom {
+      padding: 6px 14px;
+      cursor: pointer;
+      background: #D2A6A0;
+      border: none;
+      border-radius: 6px;
+      color: white;
+      font-weight: bold;
+      transition: all 0.2s;
+    }
+
+    #copyRoom:hover {
+      background: #c49590;
+      transform: translateY(-1px);
+    }
+
+    #statusText {
+      font-weight: bold;
+      color: #8B9E9D;
+    }
+
+    #scoreText {
+      font-weight: bold;
+      font-size: 18px;
+      color: #D2A6A0;
+    }
+
+    canvas {
+      background: #F3EFCC;
+      border: 4px solid #D2A6A0;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+      cursor: crosshair;
+    }
+
+    #leaderboard {
+      background: #D4C5B9;
+      padding: 15px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      min-width: 200px;
+      max-height: 500px;
+    }
+
+    #leaderboard h3 {
+      margin-bottom: 12px;
+      color: #D2A6A0;
+      font-size: 18px;
+      border-bottom: 2px solid #D2A6A0;
+      padding-bottom: 8px;
+    }
+
+    #leaderboardList {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    #leaderboardList li {
+      padding: 8px 12px;
+      background: rgba(139, 158, 157, 0.2);
+      border-radius: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 14px;
+    }
+
+    #leaderboardList li.me {
+      background: rgba(210, 166, 160, 0.4);
+      font-weight: bold;
+      border: 2px solid #D2A6A0;
+    }
+
+    .rank {
+      font-weight: bold;
+      color: #D2A6A0;
+      margin-right: 8px;
+    }
+
+    .playerName {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .playerScore {
+      font-weight: bold;
+      color: #8B9E9D;
+    }
+
+    #controls {
+      background: rgba(139, 158, 157, 0.3);
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 12px;
+      color: #2D2424;
+    }
+
+    #controls div {
+      margin: 4px 0;
+    }
+  </style>
+</head>
+<body>
+
+<div id="gameContainer">
+  <div id="leftPanel">
+    <div id="ui">
+      <div class="row">
+        <span>Room:</span>
+        <span id="roomId"></span>
+      </div>
+      <button id="copyRoom">Copy Invite</button>
+      <div class="row">
+        <span id="statusText">Connecting...</span>
+      </div>
+      <div class="row">
+        <span id="scoreText">Score: 0</span>
+      </div>
+    </div>
+
+    <div id="controls">
+      <div><strong>Controls:</strong></div>
+      <div>🖱️ Mouse - Steer</div>
+      <div>SPACE - Boost</div>
+      <div>R - Respawn</div>
+    </div>
+  </div>
+
+  <canvas id="gameCanvas" width="1000" height="700"></canvas>
+
+  <div id="leaderboard">
+    <h3>🏆 Leaderboard</h3>
+    <ul id="leaderboardList"></ul>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/* ===========================================================
+    SLITHER.IO STYLE — MULTIPLAYER — WITH LEADERBOARD
+=========================================================== */
+
+/* ---------------- SUPABASE ---------------- */
+const SUPABASE_URL = "https://cxycyvactcsppkltvzyf.supabase.co";
+const SUPABASE_ANON_KEY =
+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN4eWN5dmFjdGNzcHBrbHR2enlmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ0NDY1MTUsImV4cCI6MjA4MDAyMjUxNX0.6H6Lr35L_HDWwplqiNxlHMyrr69fPK2f6AikPhcvMRg";
+
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+/* --------------- DOM ---------------- */
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+const roomIdSpan = document.getElementById("roomId");
+const copyRoom = document.getElementById("copyRoom");
+const statusText = document.getElementById("statusText");
+const scoreText = document.getElementById("scoreText");
+const leaderboardList = document.getElementById("leaderboardList");
+
+const params = new URLSearchParams(location.search);
+const ROOM_ID = params.get("room") || Math.random().toString(36).slice(2,8);
+
+roomIdSpan.textContent = ROOM_ID;
+
+/* -------------- Copy link -------------- */
+copyRoom.onclick = () => {
+  navigator.clipboard.writeText(
+    `${location.origin}${location.pathname}?room=${ROOM_ID}`
+  );
+  copyRoom.textContent = "Copied!";
+  setTimeout(()=> copyRoom.textContent="Copy Invite", 1200);
+};
+
+/* -------------- CONFIG ---------------- */
+const W = canvas.width;
+const H = canvas.height;
+
+const SPEED = 220;
+const TURN_SPEED = 6;
+const GAP = 10;
+const SEGMENTS = 32;
+const HEAD_R = 10;
+const BODY_R = 8;
+const MAX_TRAIL = 120;
+
+// Color palette
+const SNAKE_COLORS = ["#D2A6A0", "#8B9E9D", "#D4C5B9"];
+
+function dist(a,b){ return Math.hypot(a.x-b.x, a.y-b.y); }
+
+/* -------------- Local Player -------------- */
+const myId = crypto.randomUUID().slice(0,8);
+let players = {};
+
+let my = {
+  id: myId,
+  x: W / 2,
+  y: H / 2,
+  angle: 0,
+  targetAngle: 0,
+  speed: SPEED,
+  color: SNAKE_COLORS[Math.floor(Math.random() * SNAKE_COLORS.length)],
+  trail: [],
+  segments: [],
+  alive: true,
+  score: 0,
+};
+players[myId] = my;
+
+/* seed initial trail so tail appears */
+(function seed(){
+  const t = Date.now();
+  for (let i=0;i<60;i++){
+    my.trail.push({ x: my.x - i*GAP, y: my.y, t });
+  }
+})();
+
+/* ---------------- Input ---------------- */
+let mouse = { x: my.x, y: my.y };
+
+canvas.addEventListener("mousemove", e=>{
+  const r = canvas.getBoundingClientRect();
+  mouse.x = e.clientX - r.left;
+  mouse.y = e.clientY - r.top;
+});
+
+window.onkeydown = e=>{
+  if (e.key === "r" || e.key === "R") respawn();
+  if (e.key === " ") {
+    my.speed = SPEED*1.7;
+    setTimeout(()=> my.speed=SPEED, 150);
+  }
+};
+
+function aim(){
+  return Math.atan2(mouse.y - my.y, mouse.x - my.x);
+}
+
+/* ---------------- Respawn ---------------- */
+function respawn(){
+  my.x = Math.random()*W;
+  my.y = Math.random()*H;
+  my.angle = Math.random()*Math.PI*2;
+  my.targetAngle = my.angle;
+  my.alive = true;
+  my.score = 0;
+  my.trail = [];
+  const t = Date.now();
+  for (let i=0;i<60;i++){
+    my.trail.push({ x: my.x - i*GAP, y: my.y, t });
+  }
+}
+
+/* ---------------- Realtime channel ---------------- */
+const channel = supabase.channel("slither_room_"+ROOM_ID, {
+  config:{ broadcast:{ self:false } }
+});
+
+/* handle incoming trails */
+channel.on("broadcast",{ event:"trail" }, ({payload})=>{
+  if (!payload || !payload.id) return;
+  if (payload.id === myId) return;
+
+  if (!players[payload.id]){
+    players[payload.id] = {
+      id: payload.id,
+      color: payload.color,
+      trail: payload.trail || [],
+      segments: [],
+      alive: payload.alive !== false,
+      score: payload.score || 0,
+    };
+  } else {
+    const p = players[payload.id];
+    p.trail = payload.trail;
+    p.alive = payload.alive !== false;
+    p.score = payload.score;
+  }
+});
+
+/* handle death */
+channel.on("broadcast",{ event:"dead" }, ({payload})=>{
+  if (players[payload.id]) players[payload.id].alive = false;
+});
+
+/* SUPABASE V2 SUBSCRIBE */
+channel.subscribe((status, err)=>{
+  if (status === "SUBSCRIBED"){
+    statusText.textContent = "✓ Connected";
+  }
+  if (err){
+    console.error("Subscribe Error:", err);
+    statusText.textContent = "⚠ Error connecting";
+  }
+});
+
+/* ---------------- Broadcast Trail ---------------- */
+function sendTrail(){
+  const trimmed = my.trail.slice(0, 60);
+  channel.send({
+    type:"broadcast",
+    event:"trail",
+    payload:{
+      id: myId,
+      color: my.color,
+      trail: trimmed,
+      alive: my.alive,
+      score: my.score,
+    }
+  });
+}
+
+function sendDeath(id){
+  channel.send({
+    type:"broadcast",
+    event:"dead",
+    payload:{ id }
+  });
+}
+
+/* ---------------- Build Body From Trail ---------------- */
+function buildSegments(trail){
+  const out = [];
+  if (!trail.length) return out;
+
+  out.push({ x: trail[0].x, y: trail[0].y });
+
+  let acc = 0;
+  let idx = 1;
+
+  while (out.length < SEGMENTS && idx < trail.length){
+    const prev = out[out.length-1];
+    const next = trail[idx];
+    const d = dist(prev, next);
+
+    if (acc + d >= GAP){
+      const k = (GAP - acc) / d;
+      out.push({
+        x: prev.x + (next.x - prev.x)*k,
+        y: prev.y + (next.y - prev.y)*k,
+      });
+      acc = 0;
+    } else {
+      acc += d;
+      idx++;
+    }
+  }
+
+  while (out.length < SEGMENTS) out.push(out[out.length-1]);
+
+  return out;
+}
+
+/* ---------------- Foods ---------------- */
+let foods = [];
+function spawnFood(){
+  while (foods.length < 12){
+    foods.push({
+      x: Math.random()*W,
+      y: Math.random()*H
+    });
+  }
+}
+spawnFood();
+
+/* ---------------- Leaderboard ---------------- */
+function updateLeaderboard(){
+  const sorted = Object.values(players)
+    .filter(p => p.alive)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 10);
+
+  leaderboardList.innerHTML = "";
+  
+  sorted.forEach((p, i) => {
+    const li = document.createElement("li");
+    if (p.id === myId) li.classList.add("me");
+    
+    li.innerHTML = `
+      <span class="rank">#${i+1}</span>
+      <span class="playerName">${p.id === myId ? "You" : p.id}</span>
+      <span class="playerScore">${p.score}</span>
+    `;
+    
+    leaderboardList.appendChild(li);
+  });
+}
+
+/* ---------------- GAME LOOP ---------------- */
+let last = performance.now();
+function loop(now){
+  const dt = Math.min(50, now-last)/1000;
+  last = now;
+
+  if (my.alive){
+    my.targetAngle = aim();
+    let diff = Math.atan2(
+      Math.sin(my.targetAngle - my.angle),
+      Math.cos(my.targetAngle - my.angle)
+    );
+    my.angle += diff * TURN_SPEED * dt;
+
+    my.x += Math.cos(my.angle)*my.speed*dt;
+    my.y += Math.sin(my.angle)*my.speed*dt;
+
+    if (my.x<0) my.x+=W;
+    if (my.x>W) my.x-=W;
+    if (my.y<0) my.y+=H;
+    if (my.y>H) my.y-=H;
+
+    const t = Date.now();
+    if (!my.trail.length || dist(my.trail[0], my) > 2){
+      my.trail.unshift({ x: my.x, y: my.y, t });
+      if (my.trail.length > MAX_TRAIL) my.trail.pop();
+    }
+
+    my.segments = buildSegments(my.trail);
+
+    /* Collision: remote head hits my body */
+    for (let id in players){
+      if (id === myId) continue;
+      const p = players[id];
+      if (!p.trail.length) continue;
+
+      const rh = p.trail[0];
+      for (let i=1;i<my.segments.length;i++){
+        if (dist(rh, my.segments[i]) < HEAD_R + BODY_R){
+          my.alive = false;
+          sendDeath(myId);
+        }
+      }
+    }
+
+    /* Collision: my head hits remote body */
+    for (let id in players){
+      if (id === myId) continue;
+      const p = players[id];
+      if (!p.trail.length) continue;
+
+      const segs = buildSegments(p.trail);
+      for (let i=1;i<segs.length;i++){
+        if (dist({x:my.x, y:my.y}, segs[i]) < HEAD_R + BODY_R){
+          p.alive = false;
+          my.score++;
+          sendDeath(id);
+
+          for (let g=0;g<4;g++){
+            my.trail.push(my.trail[my.trail.length-1]);
+          }
+        }
+      }
+    }
+  }
+
+  sendTrail();
+  updateLeaderboard();
+  render();
+  requestAnimationFrame(loop);
+}
+
+/* ---------------- RENDER ---------------- */
+function drawCircle(x,y,r,color){
+  ctx.beginPath();
+  ctx.fillStyle = color;
+  ctx.arc(x,y,r,0,Math.PI*2);
+  ctx.fill();
+}
+
+function drawSnake(segments, color, isMe){
+  for (let i=segments.length-1;i>=0;i--){
+    const radius = i===0 ? HEAD_R : BODY_R;
+    
+    // Add a subtle glow for own snake
+    if (isMe && i === 0){
+      ctx.shadowBlur = 15;
+      ctx.shadowColor = color;
+    }
+    
+    drawCircle(segments[i].x, segments[i].y, radius, color);
+    
+    if (isMe && i === 0){
+      ctx.shadowBlur = 0;
+      
+      // Draw eyes
+      const angle = i < segments.length-1 ? 
+        Math.atan2(segments[i].y - segments[i+1].y, segments[i].x - segments[i+1].x) : 0;
+      
+      const eyeOffset = 4;
+      const eyeDistance = 3;
+      
+      const ex1 = segments[i].x + Math.cos(angle + Math.PI/3) * eyeDistance;
+      const ey1 = segments[i].y + Math.sin(angle + Math.PI/3) * eyeDistance;
+      const ex2 = segments[i].x + Math.cos(angle - Math.PI/3) * eyeDistance;
+      const ey2 = segments[i].y + Math.sin(angle - Math.PI/3) * eyeDistance;
+      
+      drawCircle(ex1, ey1, 2, "#2D2424");
+      drawCircle(ex2, ey2, 2, "#2D2424");
+    }
+  }
+}
+
+function render(){
+  ctx.clearRect(0,0,W,H);
+
+  // Draw foods with palette colors
+  const foodColors = ["#D2A6A0", "#8B9E9D", "#D4C5B9"];
+  for (let i=0; i<foods.length; i++){
+    drawCircle(foods[i].x, foods[i].y, 5, foodColors[i % foodColors.length]);
+  }
+
+  // Draw other players
+  for (let id in players){
+    if (id===myId) continue;
+    const p = players[id];
+    if (!p.trail.length) continue;
+    const segs = buildSegments(p.trail);
+    drawSnake(segs, p.color, false);
+  }
+
+  // Draw my snake
+  if (my.segments.length){
+    drawSnake(my.segments, my.color, true);
+  }
+
+  statusText.textContent = my.alive ? "✓ Alive" : "💀 Dead — press R";
+  scoreText.textContent = "Score: " + my.score;
+}
+
+requestAnimationFrame(loop);
+</script>
+
+</body>
+</html>
