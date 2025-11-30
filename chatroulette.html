@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Random Chat</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  body {
+    font-family: Arial;
+    background:#8B9E9D;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+    color:white;
+    text-align:center;
+  }
+  #box {
+    background:#D4C5B9;
+    padding:30px;
+    border-radius:14px;
+    color:#2d2d2d;
+    width:320px;
+  }
+  button {
+    padding:10px 20px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    background:#4a6556;
+    color:white;
+    font-weight:bold;
+  }
+</style>
+</head>
+<body>
+
+<div id="box">
+  <h2>💬 Random Chat</h2>
+  <p id="status">Looking for someone...</p>
+  <button onclick="leaveQueue()">Cancel</button>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = "https://cxycyvactcsppkltvzyf.supabase.co";
+const SUPABASE_ANON_KEY =
+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN4eWN5dmFjdGNzcHBrbHR2enlmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ0NDY1MTUsImV4cCI6MjA4MDAyMjUxNX0.6H6Lr35L_HDWwplqiNxlHMyrr69fPK2f6AikPhcvMRg";
+
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const params = new URLSearchParams(location.search);
+const myId = params.get("id");
+
+let queue = {};
+let searching = true;
+
+const channel = supabase.channel("chatroulette", {
+  config:{ broadcast:{ self:false } }
+});
+
+channel.on("broadcast", { event:"join" }, ({payload})=>{
+  queue[payload.id] = payload.time;
+  tryMatch();
+});
+
+channel.on("broadcast", { event:"leave" }, ({payload})=>{
+  delete queue[payload.id];
+});
+
+channel.on("broadcast", { event:"match" }, ({payload})=>{
+  if (payload.ids.includes(myId)) {
+    window.location.href = "https://tlk.io/" + payload.room;
+  }
+});
+
+channel.subscribe(()=>{
+  joinQueue();
+});
+
+/* join the queue */
+function joinQueue(){
+  channel.send({
+    type:"broadcast",
+    event:"join",
+    payload:{ id:myId, time:Date.now() }
+  });
+}
+
+/* leave queue */
+function leaveQueue(){
+  searching = false;
+  channel.send({ type:"broadcast", event:"leave", payload:{ id:myId } });
+  window.location.href = "playground.html";
+}
+
+/* try to match 2 people */
+function tryMatch(){
+  if (!searching) return;
+  const ids = Object.keys(queue);
+  if (ids.length >= 2) {
+    const pair = ids.slice(0, 2);
+    const room = "studenthood-random-" + Math.random().toString(36).slice(2,8);
+
+    channel.send({
+      type:"broadcast",
+      event:"match",
+      payload:{ ids:pair, room }
+    });
+  }
+}
+</script>
+</body>
+</html>
