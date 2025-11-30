@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Multiplayer Tic-Tac-Toe</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    :root{--bg:#f2efe9;--card:#e7dfd4;--accent:#6b9bd1;--muted:#8b9e9d}
+    body{font-family:Inter,system-ui,Arial;margin:0;background:linear-gradient(180deg,var(--bg),#e6ebe9);display:flex;align-items:center;justify-content:center;height:100vh}
+    .wrap{width:360px;background:var(--card);border-radius:14px;padding:18px;box-shadow:0 8px 30px rgba(0,0,0,0.12)}
+    h1{text-align:center;margin:6px 0 12px;font-size:20px;color:#2d3b3b}
+    .meta{display:flex;gap:8px;align-items:center;justify-content:space-between;margin-bottom:12px}
+    .room{font-weight:700;color:var(--muted);background:rgba(107,155,209,0.08);padding:6px 10px;border-radius:8px}
+    .controls{display:flex;gap:8px}
+    button{background:var(--accent);color:#fff;border:none;padding:8px 10px;border-radius:8px;cursor:pointer;font-weight:700}
+    button.secondary{background:#8b9e9d}
+    .board{display:grid;grid-template-columns:repeat(3,100px);gap:8px;width:320px;margin:0 auto 12px}
+    .cell{width:100px;height:100px;background:#fff;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:44px;font-weight:800;color:#2d5446;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,0.08)}
+    .cell.disabled{cursor:not-allowed;opacity:0.6}
+    .info{text-align:center;color:#2d5446;font-weight:700;margin-bottom:8px}
+    .list{font-size:13px;color:#2d5446;margin-top:10px}
+    .small{font-size:12px;color:#6b7f7a;margin-top:6px}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Multiplayer Tic-Tac-Toe</h1>
+    <div class="meta">
+      <div class="room">Room: <span id="roomId">--</span></div>
+      <div class="controls">
+        <button id="copyBtn" class="secondary">Copy Invite</button>
+        <button id="resetBtn" class="secondary">New Game</button>
+      </div>
+    </div>
+
+    <div class="info" id="status">Connecting...</div>
+
+    <div class="board" id="board">
+      <!-- 9 cells inserted by JS -->
+    </div>
+
+    <div style="text-align:center">
+      <div class="small">You are: <span id="myMark">-</span> · Turn: <span id="turnName">-</span></div>
+      <div class="list" id="playersList"></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+  // ----------------- CONFIG -----------------
+  const SUPABASE_URL = "https://cxycyvactcsppkltvzyf.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN4eWN5dmFjdGNzcHBrbHR2enlmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ0NDY1MTUsImV4cCI6MjA4MDAyMjUxNX0.6H6Lr35L_HDWwplqiNxlHMyrr69fPK2f6AikPhcvMRg";
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  // ----------------- DOM -----------------
+  const boardEl = document.getElementById('board');
+  const statusEl = document.getElementById('status');
+  const roomIdEl = document.getElementById('roomId');
+  const copyBtn = document.getElementById('copyBtn');
+  const resetBtn = document.getElementById('resetBtn');
+  const playersListEl = document.getElementById('playersList');
+  const myMarkEl = document.getElementById('myMark');
+  const turnNameEl = document.getElementById('turnName');
+
+  // ----------------- ROOM ID -----------------
+  const params = new URLSearchParams(location.search);
+  const ROOM = params.get('room') || Math.random().toString(36).slice(2,8);
+  roomIdEl.textContent = ROOM;
+
+  copyBtn.onclick = async () => {
+    try {
+      await navigator.clipboard.writeText(location.origin + location.pathname + '?room=' + ROOM);
+      copyBtn.textContent = 'Copied!';
+      setTimeout(()=> copyBtn.textContent = 'Copy Invite', 1200);
+    } catch(e){}
+  };
+
+  // ----------------- GAME STATE -----------------
+  // state with simple schema:
+  // { board: Array(9) with 'X'|'O'|null, players: {id:mark,name}, turn: playerId, status: 'waiting'|'playing'|'finished', winner: id|null }
+  let state = {
+    board: Array(9).fill(null),
+    players: {}, // id -> {mark}
+    order: [],   // list of joined ids (max 2)
+    turn: null,
+    status: 'waiting',
+    winner: null
+  };
+
+  const myId = crypto.randomUUID().slice(0,8);
+  let myMark = null;
+
+  // supabase channel
+  const ch = supabase.channel('ttt_room_' + ROOM, { config: { broadcast: { self: false } } });
+
+  // render helpers
+  function renderBoard() {
+    boardEl.innerHTML = '';
+    state.board.forEach((val,i) => {
+      const c = document.createElement('div');
+      c.className = 'cell' + ((state.status !== 'playing' || state.turn !== myTurnId()) ? ' disabled' : '');
+      c.dataset.index = i;
+      c.innerText = val || '';
+      c.onclick = onCellClick;
+      boardEl.appendChild(c);
+    });
+    updateUI();
+  }
+
+  function updateUI(){
+    playersListEl.innerHTML = 'Players: ' + (state.order.map(id => (id === myId ? 'You' : id) + (state.players[id] ? ' ('+state.players[id].mark+')' : '')).join(', ') || 'Waiting for players...');
+    myMarkEl.textContent = myMark || '-';
+    turnNameEl.textContent = state.turn === myId ? 'You' : (state.turn || '-');
+    if (state.status === 'waiting') statusEl.innerText = 'Waiting for players to join...';
+    else if (state.status === 'playing') {
+      statusEl.innerText = state.turn === myId ? 'Your move' : 'Waiting for opponent';
+    } else if (state.status === 'finished') {
+      if (state.winner) {
+        statusEl.innerText = state.winner === myId ? 'You win! 🎉' : 'You lose';
+      } else {
+        statusEl.innerText = 'Draw';
+      }
+    }
+  }
+
+  function myTurnId(){ return state.turn; }
+
+  // check win/draw
+  function checkResult(b){
+    const wins = [
+      [0,1,2],[3,4,5],[6,7,8],
+      [0,3,6],[1,4,7],[2,5,8],
+      [0,4,8],[2,4,6]
+    ];
+    for (const w of wins){
+      const [a,b1,c] = w;
+      if (b[a] && b[a] === b[b1] && b[a] === b[c]) return b[a];
+    }
+    if (b.every(Boolean)) return 'draw';
+    return null;
+  }
+
+  // ----------------- ACTIONS -----------------
+  // local click
+  function onCellClick(e){
+    const idx = Number(e.currentTarget.dataset.index);
+    if (state.status !== 'playing') return;
+    if (state.board[idx]) return;
+    if (state.turn !== myId) return;
+
+    // perform move locally and broadcast
+    const next = state.board.slice();
+    next[idx] = myMark;
+    const result = checkResult(next);
+
+    const payload = {
+      type: 'move',
+      from: myId,
+      idx,
+      mark: myMark,
+      nextBoard: next,
+      nextTurn: null,
+      result: null
+    };
+
+    if (result === 'draw'){
+      payload.result = 'draw';
+      payload.nextTurn = null;
+    } else if (result){
+      // someone won
+      payload.result = 'win';
+      payload.winnerMark = myMark;
+      payload.nextTurn = null;
+    } else {
+      // normal: switch turn to other player
+      const other = state.order.find(id => id !== myId);
+      payload.nextTurn = other || myId;
+    }
+
+    // broadcast via supabase
+    ch.send({ type:'broadcast', event:'ttt_action', payload });
+    
+    // apply locally (optimistic)
+    applyMove(payload);
+  }
+
+  function applyMove(payload){
+    if (payload.type !== 'move') return;
+    state.board = payload.nextBoard;
+    state.turn = payload.nextTurn;
+    if (payload.result === 'win'){
+      state.status = 'finished';
+      // find winner id by matching mark
+      const winnerId = Object.keys(state.players).find(id => state.players[id] && state.players[id].mark === payload.winnerMark);
+      state.winner = winnerId || null;
+    } else if (payload.result === 'draw'){
+      state.status = 'finished';
+      state.winner = null;
+    } else {
+      state.status = 'playing';
+      state.winner = null;
+    }
+    renderBoard();
+  }
+
+  // new game reset
+  function resetGameRequest(){
+    // only allow reset when at least one player presses (server just resets)
+    const payload = { type:'reset', from: myId };
+    ch.send({ type:'broadcast', event:'ttt_action', payload });
+  }
+
+  resetBtn.onclick = resetGameRequest;
+
+  // apply full state update (received from network)
+  function applyStateRemote(newState){
+    state = newState;
+    myMark = state.players[myId] ? state.players[myId].mark : myMark;
+    renderBoard();
+  }
+
+  // ----------------- CHANNEL HANDLERS -----------------
+  ch.on('broadcast', { event:'ttt_action' }, ({ payload })=>{
+    if (!payload) return;
+    if (payload.type === 'move'){
+      // ignore moves we already applied (but safe to reapply)
+      applyMove(payload);
+    } else if (payload.type === 'join'){
+      // someone joined, leader will recompute state
+      // request state by broadcasting 'request_state'
+    } else if (payload.type === 'reset'){
+      // leader resets board
+      if (amLeader()) {
+        const newState = {
+          board: Array(9).fill(null),
+          players: state.players,
+          order: state.order,
+          turn: state.order[0] || myId,
+          status: state.order.length === 2 ? 'playing' : 'waiting',
+          winner: null
+        };
+        // broadcast newState
+        ch.send({ type:'broadcast', event:'ttt_state', payload: newState });
+      }
+    }
+  });
+
+  // listen for full state broadcasts
+  ch.on('broadcast', { event:'ttt_state' }, ({ payload })=>{
+    if (!payload) return;
+    applyStateRemote(payload);
+  });
+
+  // subscribe
+  ch.subscribe((status, err) => {
+    if (status === 'SUBSCRIBED') {
+      statusEl.innerText = 'Connected';
+      joinRoom();
+    }
+    if (err) {
+      statusEl.innerText = 'Connection error';
+      console.error('subscribe err', err);
+    }
+  });
+
+  // ----------------- ROOM JOIN LOGIC -----------------
+  function amLeader(){
+    // leader is first in order
+    return state.order[0] === myId;
+  }
+
+  function joinRoom(){
+    // announce join
+    ch.send({ type:'broadcast', event:'ttt_action', payload:{ type:'join', from: myId }});
+
+    // request current state - send a lightweight message that asks for state
+    ch.send({ type:'broadcast', event:'ttt_state_request', payload:{ from: myId }});
+  }
+
+  // respond to state request if we have authoritative state (leader)
+  ch.on('broadcast', { event:'ttt_state_request' }, ({ payload })=>{
+    if (!payload) return;
+    const requester = payload.from;
+    if (amLeader()) {
+      // leader responds with state
+      ch.send({ type:'broadcast', event:'ttt_state', payload: state });
+    }
+  });
+
+  // When someone joins, update players list and, if leader, assign marks and start game if 2 players
+  ch.on('broadcast', { event:'ttt_action' }, ({ payload })=>{
+    if (!payload) return;
+    if (payload.type === 'join'){
+      const id = payload.from;
+      if (!state.order.includes(id) && state.order.length < 2) {
+        state.order.push(id);
+        state.players[id] = { mark: state.order.length === 1 ? 'X' : 'O' };
+      }
+
+      // If first time, leader sets order and state and broadcasts
+      if (amLeader()) {
+        // ensure myId included
+        if (!state.order.includes(myId)) {
+          state.order.unshift(myId);
+          state.players[myId] = { mark: 'X' };
+        }
+        // ensure player marks assigned
+        state.order.forEach((pid,i) => {
+          if (!state.players[pid]) state.players[pid] = { mark: i === 0 ? 'X' : 'O' };
+        });
+
+        // start if two players
+        if (state.order.length === 2 && state.status !== 'playing') {
+          state.board = Array(9).fill(null);
+          state.turn = state.order[0];
+          state.status = 'playing';
+          state.winner = null;
+
+          ch.send({ type:'broadcast', event:'ttt_state', payload: state });
+        } else {
+          // broadcast updated players (waiting)
+          ch.send({ type:'broadcast', event:'ttt_state', payload: state });
+        }
+      }
+    }
+  });
+
+  // If we get state on initial subscribe, set up UI
+  ch.on('broadcast', { event:'ttt_state' }, ({ payload })=>{
+    if (!payload) return;
+    // adopt the state, but ensure local presence
+    state = payload;
+    if (!state.order.includes(myId)) {
+      // if leader slot available, ask to join (leader will include)
+      // also notify leader of join
+      if (state.order.length < 2 && state.order[0]) {
+        // send join message
+        ch.send({ type:'broadcast', event:'ttt_action', payload:{ type:'join', from: myId }});
+      } else {
+        // room full but still adopt state
+      }
+    }
+    if (!state.players[myId] && state.order.includes(myId) === false) {
+      // not in players yet — leader will add if possible
+    }
+    myMark = state.players[myId] ? state.players[myId].mark : null;
+    renderBoard();
+  });
+
+  // initial local state defaults and render
+  renderBoard();
+
+  // When page unload, announce leave (so leader can rebuild)
+  window.addEventListener('beforeunload', () => {
+    try {
+      ch.send({ type:'broadcast', event:'ttt_action', payload:{ type:'leave', from: myId }});
+    } catch (e) {}
+  });
+
+  // handle leave: leader recomputes and broadcasts new state
+  ch.on('broadcast', { event:'ttt_action' }, ({ payload })=>{
+    if (!payload) return;
+    if (payload.type === 'leave') {
+      const id = payload.from;
+      const idx = state.order.indexOf(id);
+      if (idx !== -1) state.order.splice(idx,1);
+      delete state.players[id];
+      // leader recalculates
+      if (amLeader()){
+        if (state.order.length === 0) {
+          // reset local
+          state = { board: Array(9).fill(null), players:{}, order:[], turn:null, status:'waiting', winner:null };
+        } else {
+          // if only one left, set waiting
+          state.status = state.order.length === 2 ? 'playing' : 'waiting';
+          if (state.status === 'waiting') state.turn = null;
+          ch.send({ type:'broadcast', event:'ttt_state', payload: state });
+        }
+      }
+    }
+  });
+
+  // small UX: clicking reset (leader will reset)
+  // done above
+
+  </script>

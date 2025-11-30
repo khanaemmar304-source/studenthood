@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Playground – Choose a Game</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #8B9E9D;
+    margin: 0;
+    padding: 40px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  h1 {
+    color: white;
+    font-size: 32px;
+    margin-bottom: 20px;
+  }
+
+  .games {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+    width: 90%;
+    max-width: 700px;
+  }
+
+  .card {
+    background: #D4C5B9;
+    padding: 25px;
+    border-radius: 14px;
+    text-align: center;
+    cursor: pointer;
+    font-size: 22px;
+    font-weight: bold;
+    transition: 0.2s ease;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+  }
+
+  .card:hover {
+    transform: translateY(-6px);
+    background: #cdbbae;
+  }
+
+  .emoji {
+    font-size: 40px;
+    display: block;
+    margin-bottom: 10px;
+  }
+
+</style>
+</head>
+<body>
+
+<h1>🎮 Choose Your Game</h1>
+
+<div class="games">
+
+  <div class="card" onclick="openGame('snake.html')">
+    <span class="emoji">🐍</span>
+    Snake Multiplayer
+  </div>
+
+  <div class="card" onclick="openGame('tictactoe.html')">
+    <span class="emoji">❌⭕</span>
+    Tic-Tac-Toe (Multiplayer)
+  </div>
+
+</div>
+
+<script>
+function openGame(game) {
+  // create random room ID on selection
+  const room = Math.random().toString(36).substring(2, 8);
+  window.location.href = `${game}?room=${room}`;
+}
+</script>
+
+</body>
+</html>
