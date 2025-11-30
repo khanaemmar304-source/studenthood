@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Global Chat</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+  body {
+    background: #8B9E9D;
+    font-family: Arial;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+  }
+
+  #chatBox {
+    width: 95%;
+    max-width: 600px;
+    background: #D4C5B9;
+    margin-top: 30px;
+    padding: 20px;
+    border-radius: 14px;
+    box-shadow: 0 6px 25px rgba(0,0,0,0.2);
+  }
+
+  #messages {
+    height: 450px;
+    overflow-y: auto;
+    background: white;
+    padding: 10px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+  }
+
+  .msg {
+    margin-bottom: 10px;
+    padding: 8px 12px;
+    background: #f2eeee;
+    border-radius: 8px;
+    font-size: 15px;
+  }
+
+  .me {
+    background: #c7e7ff;
+  }
+
+  #inputArea {
+    display: flex;
+    gap: 10px;
+  }
+
+  input {
+    flex: 1;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #aaa;
+  }
+
+  button {
+    padding: 12px 16px;
+    border: none;
+    background: #4a6556;
+    color: white;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+
+</style>
+</head>
+<body>
+
+<div id="chatBox">
+  <h2>💬 Global Student Chat</h2>
+  <p id="welcome"></p>
+
+  <div id="messages"></div>
+
+  <div id="inputArea">
+    <input id="msgInput" placeholder="Type a message..." />
+    <button onclick="sendMsg()">Send</button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/* ======================
+   SETUP SUPABASE
+====================== */
+const SUPABASE_URL = "https://cxycyvactcsppkltvzyf.supabase.co";
+const SUPABASE_ANON_KEY =
+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN4eWN5dmFjdGNzcHBrbHR2enlmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ0NDY1MTUsImV4cCI6MjA4MDAyMjUxNX0.6H6Lr35L_HDWwplqiNxlHMyrr69fPK2f6AikPhcvMRg";
+
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+/* ======================
+   USERNAME HANDLING
+====================== */
+let username = localStorage.getItem("globalChatName");
+
+if (!username) {
+  username = prompt("Enter your username for chat:");
+  if (!username || username.trim() === "") username = "User" + Math.floor(Math.random()*1000);
+  localStorage.setItem("globalChatName", username);
+}
+
+document.getElementById("welcome").innerHTML = `You are chatting as <b>${username}</b>`;
+
+/* ======================
+   REALTIME CHAT
+====================== */
+const channel = supabase.channel("global_chat", {
+  config:{ broadcast:{ self:true } }
+});
+
+/* RECEIVE MESSAGES */
+channel.on("broadcast", { event:"msg" }, ({ payload })=>{
+  addMessage(payload.user, payload.text);
+});
+
+/* SUBSCRIBE */
+channel.subscribe(() => {
+  console.log("Connected to global chat");
+});
+
+/* SEND MESSAGE */
+function sendMsg() {
+  const text = document.getElementById("msgInput").value.trim();
+  if (!text) return;
+
+  channel.send({
+    type:"broadcast",
+    event:"msg",
+    payload:{
+      user: username,
+      text
+    }
+  });
+
+  document.getElementById("msgInput").value = "";
+}
+
+/* DISPLAY MESSAGES */
+function addMessage(user, text) {
+  const box = document.getElementById("messages");
+  const div = document.createElement("div");
+
+  div.className = "msg" + (user === username ? " me" : "");
+  div.innerHTML = `<b>${user}:</b> ${text}`;
+
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+</script>
+</body>
+</html>
