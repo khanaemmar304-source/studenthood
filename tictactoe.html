@@ -1,341 +1,461 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Tic Tac Toe – Multiplayer</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+<meta charset="UTF-8" />
+<title>Tic Tac Toe – Multiplayer (Studenthood)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <style>
-  body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    background: #8B9E9D;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 30px 20px;
-    color: white;
+  :root{
+    --bg:#8B9E9D;
+    --card:#D4C5B9;
+    --accent:#4a6556;
+    --light:white;
   }
-
-  h1 {
-    margin-bottom: 10px;
+  html,body{height:100%;margin:0;font-family:Inter, "Segoe UI", Arial, sans-serif;background:linear-gradient(180deg,var(--bg),#6d7e7d);color:var(--light);display:flex;align-items:center;justify-content:center;padding:24px}
+  .container{width:980px;max-width:95%;background:linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0.03));border-radius:16px;padding:20px;box-shadow:0 20px 50px rgba(0,0,0,0.35)}
+  header{display:flex;justify-content:space-between;align-items:center;gap:12px}
+  h1{margin:0;font-size:24px}
+  .roomBox{display:flex;gap:12px;align-items:center}
+  .roomBadge{background:rgba(255,255,255,0.12);padding:8px 12px;border-radius:10px;font-weight:700;color:var(--light)}
+  .copyBtn{background:var(--accent);color:white;border:none;padding:8px 12px;border-radius:10px;cursor:pointer;font-weight:700}
+  .main{display:flex;gap:18px;margin-top:18px;flex-wrap:wrap}
+  .left{flex:1;min-width:280px}
+  .right{width:340px;min-width:260px}
+  .panel{background:linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));padding:14px;border-radius:12px}
+  .playersList{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+  .playerItem{background:rgba(255,255,255,0.03);padding:8px 10px;border-radius:8px;display:flex;justify-content:space-between;align-items:center;font-weight:700}
+  .playerYou{outline:2px solid rgba(255,255,255,0.06);box-shadow:inset 0 -2px 0 rgba(0,0,0,0.06)}
+  .small{font-size:13px;color:rgba(255,255,255,0.8)}
+  .btn{background:var(--accent);color:white;border:none;padding:10px 12px;border-radius:10px;cursor:pointer;font-weight:700;margin-top:10px;width:100%}
+  .btn.secondary{background:#6b9bd1}
+  #boardWrapper{display:flex;flex-direction:column;align-items:center;gap:12px}
+  #board{display:grid;grid-template-columns:repeat(3,120px);gap:12px;padding:12px;border-radius:12px;background:linear-gradient(180deg, rgba(0,0,0,0.05), rgba(0,0,0,0.03));}
+  .cell{width:120px;height:120px;background:var(--card);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:64px;color:#2D2424;cursor:pointer;font-weight:800;transition:transform .14s}
+  .cell:hover{transform:scale(1.04)}
+  #status{margin-top:10px;padding:8px 12px;border-radius:10px;background:rgba(0,0,0,0.12);font-weight:700}
+  .hide{display:none}
+  @media (max-width:800px){
+    #board{grid-template-columns:repeat(3,90px)}
+    .cell{width:90px;height:90px;font-size:48px}
+    .right{width:100%}
   }
-
-  #lobby {
-    background: rgba(255,255,255,0.15);
-    padding: 14px 20px;
-    border-radius: 12px;
-    margin-bottom: 20px;
-    backdrop-filter: blur(10px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-  }
-
-  #lobby p {
-    margin: 6px 0;
-    font-size: 18px;
-  }
-
-  #board {
-    display: none;
-    grid-template-columns: repeat(3, 120px);
-    gap: 10px;
-    margin-top: 20px;
-  }
-
-  .cell {
-    width: 120px;
-    height: 120px;
-    background: #D4C5B9;
-    border-radius: 12px;
-    font-size: 70px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #2D2424;
-    cursor: pointer;
-    transition: 0.2s;
-  }
-
-  .cell:hover {
-    transform: scale(1.04);
-  }
-
-  #status {
-    margin-top: 20px;
-    background: rgba(0,0,0,0.25);
-    padding: 10px 20px;
-    border-radius: 12px;
-    font-size: 20px;
-  }
-
-  button {
-    background: #4a6556;
-    color: white;
-    padding: 10px 16px;
-    border: none;
-    border-radius: 8px;
-    margin-top: 10px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: 0.2s;
-  }
-
-  button:hover {
-    transform: scale(1.05);
-  }
-
 </style>
 </head>
 <body>
+  <div class="container">
+    <header>
+      <div>
+        <h1>❌⭕ Tic Tac Toe — Studenthood</h1>
+        <div class="small">Play with friends — share the room link to invite</div>
+      </div>
 
-<h1>❌⭕ Tic Tac Toe</h1>
+      <div class="roomBox">
+        <div class="roomBadge">Room: <span id="roomId">—</span></div>
+        <button id="copyLinkBtn" class="copyBtn">Copy Invite</button>
+      </div>
+    </header>
 
-<div id="lobby">
-  <p><b>Room:</b> <span id="roomId"></span></p>
-  <p>Players: <span id="playersCount">0</span>/2</p>
-  <p id="lobbyStatus">Waiting for players…</p>
-  <button id="readyBtn" style="display:none;">Ready</button>
-  <button id="startBtn" style="display:none;">Start Game</button>
-</div>
+    <div class="main">
+      <div class="left">
+        <div class="panel" id="lobbyPanel">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div style="font-weight:800">Lobby</div>
+            <div class="small" id="playersCount">0/2</div>
+          </div>
 
-<div id="board"></div>
+          <div class="small" id="lobbyStatus" style="margin-top:8px">Waiting for players…</div>
 
-<div id="status"></div>
+          <div class="playersList" id="playersList" aria-live="polite" style="margin-top:12px">
+            <!-- players inserted here -->
+          </div>
+
+          <button id="readyBtn" class="btn hide">Ready</button>
+          <button id="startBtn" class="btn secondary hide">Start Game</button>
+        </div>
+
+        <div id="boardWrapper" class="panel" style="margin-top:14px">
+          <div id="board" aria-label="tic-tac-toe board">
+            <!-- cells -->
+          </div>
+          <div id="status" class="small">Game not started</div>
+        </div>
+      </div>
+
+      <div class="right">
+        <div class="panel">
+          <div style="font-weight:800">Instructions</div>
+          <div class="small" style="margin-top:8px">
+            • Share the room link with a friend (Copy Invite) to join.<br>
+            • First player to join is the leader and can Start the game.<br>
+            • Second player should click Ready (or leader can force-start).<br>
+            • Play by clicking a square.
+          </div>
+
+          <div style="margin-top:12px">
+            <button id="leaveBtn" class="btn" style="background:#b44d4d">Leave Room</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-/* ----------------------------------------------------------
-   BASIC ROOM SETUP
----------------------------------------------------------- */
+/*
+  Full tictactoe.html (updated)
+  - Lobby with copy link
+  - Ready / Start system
+  - Realtime sync via Supabase channel
+  - Simple, resilient logic
+*/
 
+/* ------------- CONFIG & ROOM ------------- */
+const SUPABASE_URL = "https://vehaakunkgxwuzdrlfut.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZlaGFha3Vua2d4d3V6ZHJsZnV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ0MjQ3NTUsImV4cCI6MjA4MDAwMDc1NX0.9ZIY7yMIk_eygIw-Q9YJStc8d9HTp_kswJ2Uuq2JQJo";
+
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+/* Room id from URL */
 const params = new URLSearchParams(location.search);
-const ROOM_ID = params.get("room");
-document.getElementById("roomId").textContent = ROOM_ID;
+const ROOM_ID = params.get('room') || (Math.random().toString(36).slice(2,8));
+document.getElementById('roomId').textContent = ROOM_ID;
 
+/* UI refs */
+const copyLinkBtn = document.getElementById('copyLinkBtn');
+const playersListEl = document.getElementById('playersList');
+const playersCountEl = document.getElementById('playersCount');
+const lobbyStatusEl = document.getElementById('lobbyStatus');
+const readyBtn = document.getElementById('readyBtn');
+const startBtn = document.getElementById('startBtn');
+const boardEl = document.getElementById('board');
+const statusEl = document.getElementById('status');
+const leaveBtn = document.getElementById('leaveBtn');
+
+/* Player & local state */
 const PLAYER_ID = crypto.randomUUID().slice(0,8);
-
-let players = {};
-let playerOrder = [];
-let mySymbol = null; // X or O
+let players = {};       // { id: { ready: bool } }
+let order = [];         // array of joined player ids in join order (leader = order[0])
+let symbols = {};       // mapping id -> 'X'/'O'
+let boardState = ["","","","","","","","",""];
+let turn = null;
 let gameStarted = false;
 
-const supabase = supabase.createClient(
-    "https://vehaakunkgxwuzdrlfut.supabase.co",
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZlaGFha3Vua2d4d3V6ZHJsZnV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ0MjQ3NTUsImV4cCI6MjA4MDAwMDc1NX0.9ZIY7yMIk_eygIw-Q9YJStc8d9HTp_kswJ2Uuq2JQJo"
-);
+/* ------------- Supabase channel ------------- */
+const channel = supabase.channel('ttt_' + ROOM_ID, { config: { broadcast: { self: false } } });
 
-const channel = supabase.channel("ttt_" + ROOM_ID, {
-  config: { broadcast: { self:false }}
+channel.on('broadcast', { event: 'join' }, ({ payload }) => {
+  if (!payload || !payload.id) return;
+  if (!players[payload.id]) {
+    players[payload.id] = { ready: false };
+    order.push(payload.id);
+  }
+  renderLobby();
 });
 
-/* ----------------------------------------------------------
-   UI ELEMENTS
----------------------------------------------------------- */
-const lobbyStatus = document.getElementById("lobbyStatus");
-const playersCount = document.getElementById("playersCount");
-const readyBtn = document.getElementById("readyBtn");
-const startBtn = document.getElementById("startBtn");
-const board = document.getElementById("board");
-const statusBox = document.getElementById("status");
-
-/* ----------------------------------------------------------
-   BOARD SETUP
----------------------------------------------------------- */
-let boardState = ["", "", "", "", "", "", "", "", ""];
-let turn = null;
-
-for (let i = 0; i < 9; i++) {
-  const cell = document.createElement("div");
-  cell.className = "cell";
-  cell.dataset.index = i;
-  cell.onclick = () => tryMove(i);
-  board.appendChild(cell);
-}
-
-/* ----------------------------------------------------------
-   BROADCAST HANDLERS
----------------------------------------------------------- */
-
-// Player joined
-channel.on("broadcast", {event:"join"}, ({payload}) => {
-  players[payload.id] = { ready:false };
-  updateLobby();
+channel.on('broadcast', { event: 'leave' }, ({ payload }) => {
+  if (!payload || !payload.id) return;
+  delete players[payload.id];
+  order = order.filter(id => id !== payload.id);
+  // If leader left, next becomes leader
+  // Reset game if players < 2
+  if (Object.keys(players).length < 2) {
+    gameStarted = false;
+    boardState = ["","","","","","","","",""];
+    turn = null;
+    symbols = {};
+    statusEl.textContent = 'Game not started';
+    boardEl.style.pointerEvents = 'auto';
+  }
+  renderLobby();
 });
 
-// Player ready
-channel.on("broadcast", {event:"ready"}, ({payload}) => {
+channel.on('broadcast', { event: 'ready' }, ({ payload }) => {
+  if (!payload || !payload.id) return;
+  if (!players[payload.id]) players[payload.id] = { ready: false };
   players[payload.id].ready = true;
-  updateLobby();
+  renderLobby();
+  // If two players ready and leader present -> auto-start
+  maybeAutoStart();
 });
 
-// Game state update
-channel.on("broadcast", {event:"state"}, ({payload}) => {
-  boardState = payload.boardState;
+channel.on('broadcast', { event: 'state' }, ({ payload }) => {
+  if (!payload) return;
+  // Update local state
+  boardState = payload.board;
   turn = payload.turn;
-  mySymbol = payload.symbols[PLAYER_ID];
-
+  symbols = payload.symbols || {};
+  gameStarted = !!payload.started;
   renderBoard();
-  statusBox.textContent = (turn === PLAYER_ID) ?
-      "Your turn (" + mySymbol + ")" :
-      "Opponent's turn";
-
-  board.style.display = "grid";
+  renderLobby();
+  updateStatus();
 });
 
-/* Subscribe */
-channel.subscribe(() => {
-  // Announce join
-  channel.send({
-    type:"broadcast",
-    event:"join",
-    payload:{ id:PLAYER_ID }
+channel.on('broadcast', { event: 'move' }, ({ payload }) => {
+  if (!payload) return;
+  boardState = payload.board;
+  turn = payload.turn;
+  renderBoard();
+  updateStatus();
+  checkWinner();
+});
+
+/* Subscribe and announce join */
+channel.subscribe((status, err) => {
+  if (status === 'SUBSCRIBED') {
+    // Announce join to others
+    channel.send({
+      type: 'broadcast',
+      event: 'join',
+      payload: { id: PLAYER_ID }
+    });
+    // Also render initial lobby locally (in case alone)
+    if (!players[PLAYER_ID]) {
+      players[PLAYER_ID] = { ready: false };
+      order.push(PLAYER_ID);
+    }
+    renderLobby();
+  }
+  if (err) console.error('Channel subscribe error', err);
+});
+
+/* ------------- UI Actions ------------- */
+copyLinkBtn.addEventListener('click', async () => {
+  try {
+    await navigator.clipboard.writeText(window.location.origin + window.location.pathname + '?room=' + ROOM_ID);
+    copyLinkBtn.textContent = 'Copied!';
+    setTimeout(() => copyLinkBtn.textContent = 'Copy Invite', 1300);
+  } catch (e) {
+    console.error('copy failed', e);
+  }
+});
+
+readyBtn.addEventListener('click', () => {
+  players[PLAYER_ID].ready = true;
+  channel.send({ type:'broadcast', event:'ready', payload: { id: PLAYER_ID }});
+  readyBtn.classList.add('hide');
+  lobbyStatusEl.textContent = 'Ready — waiting for leader to start';
+});
+
+startBtn.addEventListener('click', () => {
+  // only leader can start
+  if (order[0] !== PLAYER_ID) return;
+  if (Object.keys(players).length < 2) {
+    alert('Need 2 players to start');
+    return;
+  }
+  startGame();
+});
+
+leaveBtn.addEventListener('click', () => {
+  channel.send({ type:'broadcast', event:'leave', payload:{ id: PLAYER_ID }});
+  // reload to clear local state
+  location.href = '/';
+});
+
+/* ------------- Board init ------------- */
+function buildBoardUI(){
+  boardEl.innerHTML = '';
+  for (let i=0;i<9;i++){
+    const cell = document.createElement('div');
+    cell.className = 'cell';
+    cell.dataset.index = i;
+    cell.onclick = () => cellClicked(i);
+    boardEl.appendChild(cell);
+  }
+}
+buildBoardUI();
+
+/* ------------- Render helpers ------------- */
+function renderLobby(){
+  // Ensure order preserves join order (if some clients have different order, try to canonicalize by keys)
+  // We'll use the order array we've seen via join events; ensure PLAYER_ID present
+  if (!order.includes(PLAYER_ID)) order.push(PLAYER_ID);
+
+  playersListEl.innerHTML = '';
+  const ids = Object.keys(players);
+  playersCountEl.textContent = `${ids.length}/2`;
+
+  // Rebuild order to show leader first if possible
+  const displayOrder = order.filter(id => players[id]).slice(0,2);
+
+  displayOrder.forEach((id, idx) => {
+    const item = document.createElement('div');
+    item.className = 'playerItem' + (id === PLAYER_ID ? ' playerYou' : '');
+    item.innerHTML = `<span>${id}${idx===0 ? ' (leader)' : ''}</span><span class="small">${players[id].ready ? 'Ready' : 'Not ready'}</span>`;
+    playersListEl.appendChild(item);
   });
 
-  updateLobby();
-});
-
-/* ----------------------------------------------------------
-   LOBBY LOGIC
----------------------------------------------------------- */
-
-function updateLobby() {
-  const count = Object.keys(players).length;
-  playersCount.textContent = count;
-
-  // Leader = first player in room
-  const isLeader = Object.keys(players)[0] === PLAYER_ID;
-
-  if (!gameStarted) {
-    if (count === 1) {
-      lobbyStatus.textContent = "Waiting for opponent…";
-      readyBtn.style.display = "none";
-      startBtn.style.display = "none";
-    }
-    else if (count === 2) {
-      lobbyStatus.textContent = "Both players joined.";
-
-      if (isLeader) {
-        startBtn.style.display = "block";
-        readyBtn.style.display = "none";
+  // UI rules
+  const isLeader = displayOrder[0] === PLAYER_ID;
+  if (ids.length < 2) {
+    lobbyStatusEl.textContent = 'Waiting for players…';
+    readyBtn.classList.add('hide');
+    startBtn.classList.add('hide');
+  } else {
+    // Two players present
+    lobbyStatusEl.textContent = '2 players joined';
+    if (isLeader) {
+      startBtn.classList.remove('hide');
+      readyBtn.classList.add('hide');
+      // check if other player ready -> auto-start or allow leader to start
+      const otherId = displayOrder.find(id=>id !== PLAYER_ID);
+      if (otherId && players[otherId] && players[otherId].ready) {
+        lobbyStatusEl.textContent = 'Opponent ready — you can Start (or auto-start will happen)';
+      }
+    } else {
+      // non-leader
+      readyBtn.classList.remove('hide');
+      startBtn.classList.add('hide');
+      if (players[PLAYER_ID] && players[PLAYER_ID].ready) {
+        lobbyStatusEl.textContent = 'Waiting for leader to start';
       } else {
-        readyBtn.style.display = "block";
-        startBtn.style.display = "none";
+        lobbyStatusEl.textContent = 'Click Ready to play';
+      }
+    }
+  }
+  updateStatus();
+}
+
+function renderBoard(){
+  const cells = boardEl.querySelectorAll('.cell');
+  cells.forEach((c,i) => {
+    c.textContent = boardState[i] || '';
+  });
+  updateStatus();
+}
+
+function updateStatus(){
+  if (!gameStarted) {
+    statusEl.textContent = 'Game not started';
+    return;
+  }
+  if (!turn) {
+    statusEl.textContent = 'Starting...';
+    return;
+  }
+  if (turn === PLAYER_ID) {
+    statusEl.textContent = `Your turn (${symbols[PLAYER_ID] || 'X'})`;
+  } else {
+    statusEl.textContent = `Waiting for opponent (${symbols[turn] || 'O'})`;
+  }
+}
+
+/* ------------- Game logic ------------- */
+
+function maybeAutoStart(){
+  const ids = Object.keys(players);
+  if (ids.length === 2) {
+    const leader = order[0];
+    const other = ids.find(id=>id !== leader);
+    if (leader && players[other] && players[other].ready) {
+      // start automatically if leader is in room and sees other ready
+      if (leader === PLAYER_ID) {
+        // leader triggers start
+        startGame();
       }
     }
   }
 }
 
-/* Player click READY */
-readyBtn.onclick = () => {
-  channel.send({
-    type:"broadcast",
-    event:"ready",
-    payload:{ id:PLAYER_ID }
-  });
+function startGame(){
+  const ids = Object.keys(players).slice(0,2);
+  if (ids.length < 2) {
+    alert('Need 2 players to start');
+    return;
+  }
+  // Assign symbols: leader X, other O (leader = first in order array, if missing fallback to ids[0])
+  let leaderId = order.find(id=>ids.includes(id)) || ids[0];
+  let otherId = ids.find(id=>id !== leaderId);
+  if (!otherId) otherId = ids[1] || ids[0];
 
-  readyBtn.textContent = "Ready ✔";
-  readyBtn.disabled = true;
-};
+  symbols = {};
+  symbols[leaderId] = 'X';
+  symbols[otherId] = 'O';
 
-/* Leader clicks START */
-startBtn.onclick = () => {
-  if (Object.keys(players).length < 2) return;
-
-  startGame();
-};
-
-/* ----------------------------------------------------------
-   START GAME
----------------------------------------------------------- */
-function startGame() {
+  boardState = ["","","","","","","","",""];
+  turn = leaderId;
   gameStarted = true;
 
-  const ids = Object.keys(players);
-
-  const symbols = {
-    [ids[0]]: "X",
-    [ids[1]]: "O"
-  };
-
-  turn = ids[0];
-
+  // Broadcast state
   channel.send({
-    type:"broadcast",
-    event:"state",
+    type: 'broadcast',
+    event: 'state',
     payload: {
-      boardState,
+      started: true,
+      board: boardState,
       turn,
       symbols
     }
   });
 
-  lobby.style.display = "none";
-  board.style.display = "grid";
+  // UI updates
+  renderBoard();
+  renderLobby();
 }
 
-/* ----------------------------------------------------------
-   ATTEMPT MOVE
----------------------------------------------------------- */
-function tryMove(index) {
+function cellClicked(index){
+  if (!gameStarted) return;
   if (turn !== PLAYER_ID) return;
-  if (boardState[index] !== "") return;
+  if (boardState[index]) return; // occupied
 
-  boardState[index] = mySymbol;
+  boardState[index] = symbols[PLAYER_ID];
+  // switch turn
+  const ids = Object.keys(symbols);
+  const next = ids.find(id=>id !== PLAYER_ID);
 
-  // Switch turn
-  const ids = Object.keys(players);
-  turn = (turn === ids[0]) ? ids[1] : ids[0];
+  turn = next || ids[0];
 
+  // broadcast move
   channel.send({
-    type:"broadcast",
-    event:"state",
+    type: 'broadcast',
+    event: 'move',
     payload: {
-      boardState,
-      turn,
-      symbols: {
-        [ids[0]]: "X",
-        [ids[1]]: "O"
-      }
+      board: boardState,
+      turn
     }
   });
 
+  renderBoard();
   checkWinner();
 }
 
-/* ----------------------------------------------------------
-   WIN CHECK
----------------------------------------------------------- */
-
-function checkWinner() {
+function checkWinner(){
   const wins = [
-    [0,1,2],[3,4,5],[6,7,8], // rows
-    [0,3,6],[1,4,7],[2,5,8], // cols
-    [0,4,8],[2,4,6]          // diagonals
+    [0,1,2],[3,4,5],[6,7,8],
+    [0,3,6],[1,4,7],[2,5,8],
+    [0,4,8],[2,4,6]
   ];
-
   for (let w of wins) {
     const [a,b,c] = w;
-    if (boardState[a] &&
-        boardState[a] === boardState[b] &&
-        boardState[a] === boardState[c]) {
-
-      setTimeout(() => {
-        alert("Winner: " + boardState[a]);
+    if (boardState[a] && boardState[a] === boardState[b] && boardState[a] === boardState[c]) {
+      // announce winner
+      const winnerSymbol = boardState[a];
+      setTimeout(()=> {
+        alert(`Winner: ${winnerSymbol}`);
         location.reload();
-      }, 200);
+      }, 120);
+      return;
     }
+  }
+  // check draw
+  if (boardState.every(cell => cell)) {
+    setTimeout(()=> {
+      alert('Draw!');
+      location.reload();
+    }, 120);
   }
 }
 
-/* ----------------------------------------------------------
-   RENDER BOARD
----------------------------------------------------------- */
-function renderBoard() {
-  const cells = document.querySelectorAll(".cell");
-  cells.forEach((cell, i) => {
-    cell.textContent = boardState[i];
-  });
-}
+/* ------------- Clean up on close ------------- */
+window.addEventListener('beforeunload', ()=> {
+  try {
+    channel.send({ type:'broadcast', event:'leave', payload:{ id: PLAYER_ID }});
+  } catch(e){}
+});
+
+/* initial render */
+renderLobby();
+renderBoard();
 
 </script>
 </body>
