@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UNO Multiplayer – Studenthood</title>
+
+  <style>
+    body {
+      margin: 0;
+      background: #f5e6d3;
+      font-family: "Segoe UI", sans-serif;
+      color: #2d5446;
+    }
+
+    #topBar {
+      background: #ffffffcc;
+      backdrop-filter: blur(10px);
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+    }
+
+    #topBar h1 {
+      margin: 0;
+      font-size: 28px;
+      color: #2d5446;
+      font-weight: 700;
+    }
+
+    #roomBox {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    #roomId {
+      background: #e8dcc8;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-weight: 600;
+    }
+
+    #copyBtn {
+      background: #4a6556;
+      padding: 6px 12px;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    #gameArea {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 30px;
+    }
+
+    /* Center card pile */
+    #pile {
+      width: 160px;
+      height: 240px;
+      margin-top: 20px;
+      position: relative;
+    }
+
+    #pile img {
+      width: 100%;
+      border-radius: 12px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+    }
+
+    /* Player hand */
+    #hand {
+      margin-top: 40px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+      background: rgba(255,255,255,0.5);
+      padding: 20px;
+      border-radius: 20px;
+      width: 90%;
+      max-width: 900px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+    }
+
+    .card {
+      width: 100px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .card:hover {
+      transform: translateY(-10px) scale(1.05);
+    }
+
+    #turnIndicator {
+      margin-top: 20px;
+      font-size: 22px;
+      background: #4a6556;
+      color: white;
+      padding: 10px 24px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+  </style>
+
+</head>
+<body>
+
+  <div id="topBar">
+    <h1>UNO — Studenthood Game</h1>
+    
+    <div id="roomBox">
+      <span id="roomId">Room: ---</span>
+      <button id="copyBtn">Copy Link</button>
+    </div>
+  </div>
+
+  <div id="gameArea">
+    <h2 id="turnIndicator">Waiting for players…</h2>
+
+    <div id="pile">
+      <img id="pileCard" src="img/back.png">
+    </div>
+
+    <div id="hand"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="uno.js"></script>
+
+</body>
+</html>
